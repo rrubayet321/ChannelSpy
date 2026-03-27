@@ -1,0 +1,264 @@
+# ChannelSpy — Cursor Rules
+# YouTube Competitor Intelligence Platform
+# Author: Rubayet Hassan | Built for VidMetrics Challenge
+
+## 🧠 PROJECT IDENTITY
+You are building **ChannelSpy** — a premium YouTube competitor analytics SaaS tool.
+This is a job challenge submission that must impress enterprise clients and hiring managers.
+Every decision should reflect: speed, polish, and product thinking.
+
+## 🏗️ TECH STACK (NON-NEGOTIABLE)
+- **Framework**: Next.js 14 (App Router, TypeScript)
+- **Styling**: Tailwind CSS + custom CSS variables
+- **UI Components**: shadcn/ui (already configured)
+- **Charts**: Recharts
+- **Icons**: Lucide React
+- **Fonts**: Geist (headings) + Inter (body) — via next/font
+- **API**: YouTube Data API v3
+- **Deploy**: Vercel
+- **State**: React hooks + Context (no Redux overkill)
+- **Data fetching**: Native fetch with Next.js API routes
+
+## 📁 FILE STRUCTURE (FOLLOW EXACTLY)
+```
+channelspy/
+├── app/
+│   ├── layout.tsx
+│   ├── page.tsx
+│   ├── globals.css
+│   └── api/
+│       └── youtube/
+│           └── route.ts        # YouTube API proxy — key stays server-side
+├── components/
+│   ├── ui/                     # shadcn auto-generated
+│   ├── channel/
+│   │   ├── ChannelHeader.tsx
+│   │   ├── VideoGrid.tsx
+│   │   ├── VideoCard.tsx
+│   │   └── MetricBadge.tsx
+│   ├── charts/
+│   │   ├── ViewsChart.tsx
+│   │   ├── EngagementChart.tsx
+│   │   └── TopVideosChart.tsx
+│   ├── filters/
+│   │   ├── SortBar.tsx
+│   │   └── FilterPanel.tsx
+│   └── layout/
+│       ├── Header.tsx
+│       └── SearchInput.tsx
+├── lib/
+│   ├── youtube.ts
+│   ├── utils.ts
+│   └── types.ts
+├── hooks/
+│   └── useChannelData.ts
+└── .env.local                  # YOUTUBE_API_KEY — never commit
+```
+
+## 🎨 DESIGN SYSTEM
+
+### Color Palette (Dark Neutral Minimal)
+```css
+:root {
+  --bg-primary: #0a0a0a;
+  --bg-secondary: #111111;
+  --bg-card: #161616;
+  --bg-hover: #1c1c1c;
+  --border: #2a2a2a;
+  --border-subtle: #1f1f1f;
+  --text-primary: #f5f5f5;
+  --text-secondary: #a1a1a1;
+  --text-muted: #525252;
+  --accent: #e4e4e7;
+  --accent-blue: #3b82f6;
+  --accent-green: #22c55e;
+  --accent-red: #ef4444;
+  --accent-amber: #f59e0b;
+}
+```
+
+### Typography
+- Headings: Geist font, `tracking-tight`
+- Body: Inter, `text-sm`, `text-secondary`
+- Numbers/metrics: `font-mono` ALWAYS
+- NEVER use default browser fonts
+
+### Card Pattern
+```tsx
+className="bg-[var(--bg-card)] border border-[var(--border)] rounded-xl p-4 
+           hover:border-zinc-600 transition-all duration-200"
+```
+
+## 📊 CORE FEATURES (BUILD IN ORDER)
+
+### Phase 1 — Foundation
+1. Channel URL input (parse @handle, /channel/, /c/ formats)
+2. YouTube API proxy route
+3. Fetch channel info + video list
+4. Basic video grid with thumbnail, title, views, date
+
+### Phase 2 — Analytics Engine
+5. Engagement Rate = `(likes + comments) / views * 100`
+6. Performance Score (0-100) = weighted composite:
+   - 40% views (normalized vs channel avg)
+   - 35% engagement rate
+   - 25% recency bonus
+7. Trend Velocity = views last 30d vs prev 30d (% delta)
+8. Sort: Views, Engagement, Score, Date, Duration
+9. Filter: date range, min views, video type
+
+### Phase 3 — Charts
+10. Views over time (LineChart — last 20 videos)
+11. Top 10 by views (BarChart)
+12. Engagement distribution (BarChart)
+13. Channel stats overview (4 KPI cards)
+
+### Phase 4 — Polish
+14. CSV export (all metrics)
+15. "Best Performer" badge on top 3 videos
+16. Trending up/down indicator per video
+17. Click video → opens YouTube in new tab
+18. Mobile responsive
+
+## 🔧 YOUTUBE API USAGE
+
+### Endpoints:
+```typescript
+// Channel lookup
+GET /youtube/v3/channels?part=snippet,statistics&forHandle={handle}&key=KEY
+
+// Videos via uploads playlist
+GET /youtube/v3/playlistItems?part=snippet&playlistId={uploadsId}&maxResults=50&key=KEY
+
+// Batch video stats
+GET /youtube/v3/videos?part=snippet,statistics,contentDetails&id={ids}&key=KEY
+```
+
+### URL Parsing — handle ALL formats:
+```typescript
+// https://www.youtube.com/@MrBeast
+// https://www.youtube.com/channel/UCX6OQ3DkcsbYNE6H8uQQuVA
+// https://www.youtube.com/c/MrBeast6000
+// @MrBeast (bare handle)
+// MrBeast (just name)
+```
+
+### CRITICAL: API key is ALWAYS server-side
+- Route: `/app/api/youtube/route.ts`
+- Env var: `YOUTUBE_API_KEY`
+- Client never touches the key
+
+## 💡 DIFFERENTIATORS THAT WIN THE CHALLENGE
+
+1. **Performance Score** — branded 0-100 score on every card
+2. **Trend Velocity** — ↑↓ arrow + % vs channel average
+3. **Branded copy** — "Scanning channel...", "Intel ready", "Spy Report"
+4. **Skeleton loaders** — never show raw loading spinners
+5. **Staggered card animations** — CSS animation-delay per card
+6. **Color-coded metrics** — green above avg, red below avg
+7. **One-click CSV export**
+8. **Channel comparison-ready UI** (even if not fully built)
+
+## 🧩 TYPE DEFINITIONS (use in lib/types.ts)
+```typescript
+interface Channel {
+  id: string;
+  title: string;
+  handle: string;
+  description: string;
+  thumbnailUrl: string;
+  bannerUrl?: string;
+  subscriberCount: number;
+  videoCount: number;
+  viewCount: number;
+  publishedAt: string;
+  uploadsPlaylistId: string;
+}
+
+interface Video {
+  id: string;
+  title: string;
+  thumbnailUrl: string;
+  publishedAt: string;
+  duration: string;
+  viewCount: number;
+  likeCount: number;
+  commentCount: number;
+  engagementRate: number;   // calculated
+  performanceScore: number; // calculated
+  trendDelta: number;       // % vs channel avg views
+}
+
+interface ChannelAnalytics {
+  channel: Channel;
+  videos: Video[];
+  avgViews: number;
+  avgEngagement: number;
+  postingFrequency: string; // "~3 videos/week"
+  topPerformers: Video[];
+}
+```
+
+## 🛠️ UTILITY FUNCTIONS (lib/utils.ts)
+```typescript
+formatViews(n: number): string     // 1234567 → "1.2M"
+formatDate(iso: string): string    // → "Mar 15, 2024"
+formatDuration(pt: string): string // "PT4M33S" → "4:33"
+formatEngagement(n: number): string // 0.0423 → "4.23%"
+calcEngagementRate(likes, comments, views): number
+calcPerformanceScore(video, channelAvgViews, channelAvgEngagement): number
+calcTrendDelta(video, channelAvgViews): number
+parseChannelUrl(input: string): { type: 'handle'|'channelId'|'username', value: string }
+exportToCSV(videos: Video[], channelName: string): void
+```
+
+## ⚠️ NEVER DO THIS
+- No purple gradient backgrounds
+- No hardcoded API keys
+- No `alert()` — use inline errors or toast
+- No `any` TypeScript types
+- No `console.log` left in code
+- No missing loading/error states
+- No lorem ipsum
+- No generic spinner (use skeletons)
+
+## 📦 PACKAGE INSTALL COMMANDS
+```bash
+npx create-next-app@latest channelspy --typescript --tailwind --app --eslint
+cd channelspy
+npx shadcn-ui@latest init
+npx shadcn-ui@latest add button input card badge skeleton toast tabs
+npm install recharts lucide-react date-fns
+```
+
+## 🚀 DEPLOYMENT
+- Platform: Vercel
+- Env var to set: `YOUTUBE_API_KEY`
+- Build command: `npm run build`
+- All API calls via Next.js route handlers
+
+## ✅ SHIP CHECKLIST
+- [ ] Handles all YouTube URL formats
+- [ ] API key is server-side only
+- [ ] Mobile responsive at 375px
+- [ ] All 3 chart types working
+- [ ] Export CSV functional
+- [ ] Error state: channel not found
+- [ ] Error state: quota exceeded
+- [ ] Skeleton loaders on all fetch states
+- [ ] Performance Score visible on every video card
+- [ ] Vercel deployed + env var set
+- [ ] `.env.local` in `.gitignore`
+- [ ] README complete
+
+## 📝 COMMIT CONVENTION
+```
+feat: add performance score algorithm
+fix: parse /c/ channel URL format  
+ui: skeleton loading for video grid
+perf: batch video API calls (50/req)
+docs: update README with setup steps
+```
+
+---
+This is a client demo. Every pixel counts. Ship it like a $49/mo SaaS product.
