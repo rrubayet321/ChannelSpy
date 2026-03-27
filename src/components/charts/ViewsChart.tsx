@@ -36,7 +36,7 @@ export function ViewsChart({ videos }: ViewsChartProps) {
 
   return (
     <div className="overflow-hidden rounded-2xl border border-[#1e1e1e] bg-[#0f0f0f] p-5">
-      <p className="mb-3 text-sm font-medium text-white">Views Trend (Last 20 Videos)</p>
+      <p className="mb-3 text-sm font-medium text-white">View Trend (Latest 20 Uploads)</p>
       <div className="h-72 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={chartData} margin={{ top: 8, right: 8, left: 8, bottom: 8 }}>

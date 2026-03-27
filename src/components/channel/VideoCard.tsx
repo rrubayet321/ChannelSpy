@@ -14,7 +14,7 @@ type VideoCardProps = {
 export function VideoCard({ video, channelAvgViews, index }: VideoCardProps) {
   const scoreTone = getScoreTone(video.performanceScore)
   const trendUp = video.trendDelta >= 0
-  const trendLabel = `${trendUp ? "+" : ""}${video.trendDelta.toFixed(0)}% vs avg`
+  const trendLabel = `${Math.abs(video.trendDelta).toFixed(0)}% ${trendUp ? "above" : "below"} channel average`
   const aboveAverage = video.viewCount >= channelAvgViews
   const youtubeUrl = `https://www.youtube.com/watch?v=${video.id}`
   const scoreTopBorderClass =
@@ -59,9 +59,12 @@ export function VideoCard({ video, channelAvgViews, index }: VideoCardProps) {
             Top Performer
           </span>
         ) : null}
-        <MetricBadge label={`${formatEngagement(video.engagementRate)} engagement`} tone="blue" />
-        <MetricBadge label={`Score ${video.performanceScore}`} tone={scoreTone} />
-        <MetricBadge label={aboveAverage ? "Above avg" : "Below avg"} tone={aboveAverage ? "green" : "red"} />
+        <MetricBadge label={`${formatEngagement(video.engagementRate)} audience connection`} tone="blue" />
+        <MetricBadge label={`Strength ${video.performanceScore}`} tone={scoreTone} />
+        <MetricBadge
+          label={aboveAverage ? "Above channel average" : "Below channel average"}
+          tone={aboveAverage ? "green" : "red"}
+        />
       </div>
 
       {/* Stats row */}

@@ -22,6 +22,9 @@ export function VideoGrid({ videos, channelAvgViews }: VideoGridProps) {
   const [sortBy, setSortBy] = useState<SortOption>("views")
   const [preset, setPreset] = useState<FilterPreset>("all")
   const [minViews, setMinViews] = useState("")
+  const [advancedOpen, setAdvancedOpen] = useState(false)
+
+  const hasSecondaryFilters = preset !== "all" || minViews.trim().length > 0
 
   const filteredAndSortedVideos = useMemo(() => {
     const fromTimestamp = getPresetStartTimestamp(preset)
@@ -61,14 +64,45 @@ export function VideoGrid({ videos, channelAvgViews }: VideoGridProps) {
         Showing {filteredAndSortedVideos.length} of {videos.length}
       </p>
 
-      <div className="flex flex-col gap-3 rounded-xl border-y border-[#1e1e1e] bg-[#0f0f0f] px-0 py-3 lg:flex-row lg:items-center lg:justify-between">
-        <FilterPanel
-          preset={preset}
-          minViews={minViews}
-          onPresetChange={setPreset}
-          onMinViewsChange={setMinViews}
-        />
-        <SortBar value={sortBy} onChange={setSortBy} />
+      <div className="space-y-3 rounded-xl border-y border-[#1e1e1e] bg-[#0f0f0f] px-0 py-3">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-xs text-[#666]">
+            Essentials first: sort quickly, then open advanced filters if needed.
+          </p>
+          <div className="flex items-center gap-2">
+            <SortBar value={sortBy} onChange={setSortBy} />
+            <button
+              type="button"
+              onClick={() => setAdvancedOpen((current) => !current)}
+              className="rounded-lg border border-[#1e1e1e] bg-[#0f0f0f] px-3 py-1 text-xs text-[#888] transition-colors hover:border-[#333] hover:text-white"
+            >
+              {advancedOpen ? "Hide advanced" : "Advanced filters"}
+            </button>
+          </div>
+        </div>
+
+        {advancedOpen && (
+          <div className="flex flex-col gap-2 border-t border-[#1a1a1a] pt-3">
+            <FilterPanel
+              preset={preset}
+              minViews={minViews}
+              onPresetChange={setPreset}
+              onMinViewsChange={setMinViews}
+            />
+            {hasSecondaryFilters && (
+              <button
+                type="button"
+                onClick={() => {
+                  setPreset("all")
+                  setMinViews("")
+                }}
+                className="self-start rounded-lg border border-[#1e1e1e] px-2.5 py-1 text-xs text-[#888] transition-colors hover:border-[#333] hover:text-white"
+              >
+                Reset advanced filters
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {filteredAndSortedVideos.length === 0 ? (

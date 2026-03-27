@@ -31,6 +31,8 @@ export interface AnalyticsBucket {
   videos: Video[]
   avgViews: number
   avgEngagement: number
+  momentumPercent: number
+  consistencyScore: number
   postingFrequency: string
   topPerformers: Video[]
 }

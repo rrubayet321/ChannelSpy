@@ -298,6 +298,8 @@ function buildAnalyticsBucket(
       videos: [],
       avgViews: 0,
       avgEngagement: 0,
+      momentumPercent: 0,
+      consistencyScore: 0,
       postingFrequency: "~N/A",
       topPerformers: [],
     }
@@ -324,6 +326,8 @@ function buildAnalyticsBucket(
     videos: enrichedVideos,
     avgViews,
     avgEngagement,
+    momentumPercent: calculateMomentumPercent(enrichedVideos),
+    consistencyScore: calculateConsistencyScore(enrichedVideos),
     postingFrequency: calculatePostingFrequency(enrichedVideos),
     topPerformers,
   }
@@ -355,6 +359,50 @@ function calculatePostingFrequency(videos: Pick<Video, "publishedAt">[]): string
 
   const videosPerMonth = 30 / avgDaysBetweenUploads
   return `~${videosPerMonth.toFixed(1)} videos/month`
+}
+
+function calculateMomentumPercent(videos: Pick<Video, "publishedAt" | "viewCount">[]): number {
+  if (videos.length < 6) return 0
+
+  const sorted = [...videos].sort(
+    (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime(),
+  )
+  const recent = sorted.slice(0, 5)
+  const previous = sorted.slice(5, 10)
+  if (previous.length === 0) return 0
+
+  const recentAvg = calculateAverage(recent.map((video) => video.viewCount))
+  const previousAvg = calculateAverage(previous.map((video) => video.viewCount))
+  if (previousAvg <= 0) return 0
+
+  return ((recentAvg - previousAvg) / previousAvg) * 100
+}
+
+function calculateConsistencyScore(videos: Pick<Video, "publishedAt">[]): number {
+  if (videos.length < 3) return 0
+
+  const timestamps = videos
+    .map((video) => new Date(video.publishedAt).getTime())
+    .filter((timestamp) => Number.isFinite(timestamp))
+    .sort((a, b) => b - a)
+
+  if (timestamps.length < 3) return 0
+
+  const gaps: number[] = []
+  for (let i = 0; i < timestamps.length - 1; i += 1) {
+    const gapDays = Math.max(0, timestamps[i] - timestamps[i + 1]) / (1000 * 60 * 60 * 24)
+    gaps.push(gapDays)
+  }
+
+  const avgGap = calculateAverage(gaps)
+  if (avgGap <= 0) return 0
+
+  const variance = calculateAverage(gaps.map((gap) => (gap - avgGap) ** 2))
+  const stdDev = Math.sqrt(variance)
+  const coefficient = stdDev / avgGap
+
+  const score = Math.round((1 - Math.min(coefficient, 1.2) / 1.2) * 100)
+  return Math.max(0, Math.min(100, score))
 }
 
 function extractApiErrorDetails(payload: unknown, fallback: string): {

@@ -37,7 +37,7 @@ export function EngagementChart({ videos }: EngagementChartProps) {
 
   return (
     <div className="overflow-hidden rounded-2xl border border-[#1e1e1e] bg-[#0f0f0f] p-5">
-      <p className="mb-3 text-sm font-medium text-white">Engagement Rate by Video</p>
+      <p className="mb-3 text-sm font-medium text-white">Audience Connection by Video</p>
       <div className="h-72 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chartData} margin={{ top: 8, right: 8, left: 8, bottom: 8 }}>
