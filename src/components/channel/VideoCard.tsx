@@ -17,10 +17,17 @@ export function VideoCard({ video, channelAvgViews, index }: VideoCardProps) {
   const trendLabel = `${trendUp ? "+" : ""}${video.trendDelta.toFixed(0)}% vs avg`
   const aboveAverage = video.viewCount >= channelAvgViews
   const youtubeUrl = `https://www.youtube.com/watch?v=${video.id}`
+  const scoreTopBorderClass =
+    video.performanceScore >= 70
+      ? "border-t-2 border-t-[#3ecf8e]"
+      : video.performanceScore >= 50
+        ? "border-t-2 border-t-[#4f8ef7]"
+        : ""
+  const isTopPerformer = index < 3
 
   return (
     <div
-      className="video-card-enter group overflow-hidden rounded-2xl border border-[#1e1e1e] bg-[#0f0f0f] transition-all duration-200 hover:-translate-y-0.5 hover:border-[#2a2a2a]"
+      className={`video-card-enter group overflow-hidden rounded-2xl border border-[#1e1e1e] bg-[#0f0f0f] transition-all duration-200 hover:-translate-y-0.5 hover:border-[#2a2a2a] ${scoreTopBorderClass}`}
       style={{ animationDelay: `${index * 50}ms` }}
     >
       {/* Thumbnail */}
@@ -47,6 +54,11 @@ export function VideoCard({ video, channelAvgViews, index }: VideoCardProps) {
 
       {/* Badges */}
       <div className="mt-2 flex flex-wrap items-center gap-1.5 px-3">
+        {isTopPerformer ? (
+          <span className="rounded-full border border-[#3ecf8e]/20 bg-[#3ecf8e]/10 px-2 py-0.5 text-[10px] text-[#3ecf8e]">
+            Top Performer
+          </span>
+        ) : null}
         <MetricBadge label={`${formatEngagement(video.engagementRate)} engagement`} tone="blue" />
         <MetricBadge label={`Score ${video.performanceScore}`} tone={scoreTone} />
         <MetricBadge label={aboveAverage ? "Above avg" : "Below avg"} tone={aboveAverage ? "green" : "red"} />
@@ -54,9 +66,9 @@ export function VideoCard({ video, channelAvgViews, index }: VideoCardProps) {
 
       {/* Stats row */}
       <div className="mt-2 flex items-center justify-between px-3 pb-3">
-        <p className="font-mono text-base font-semibold text-white">{formatViews(video.viewCount)} views</p>
-        <p className={`flex items-center gap-1 text-xs ${trendUp ? "text-[#3ecf8e]" : "text-[#f04444]"}`}>
-          {trendUp ? <ArrowUpRight className="h-3.5 w-3.5" /> : <ArrowDownRight className="h-3.5 w-3.5" />}
+        <p className="font-mono text-xl font-bold text-white">{formatViews(video.viewCount)} views</p>
+        <p className={`ml-auto flex items-center gap-1 text-xs ${trendUp ? "text-[#3ecf8e]" : "text-[#f04444]"}`}>
+          {trendUp ? <ArrowUpRight className="h-4 w-4" /> : <ArrowDownRight className="h-4 w-4" />}
           {trendLabel}
         </p>
       </div>

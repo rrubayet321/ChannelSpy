@@ -19,7 +19,7 @@ export function MetricBadge({ label, tone = "neutral" }: MetricBadgeProps) {
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-medium",
+        "inline-flex items-center rounded-md border px-1.5 py-0.5 text-[10px] font-normal",
         toneClassMap[tone],
       )}
     >

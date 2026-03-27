@@ -17,22 +17,22 @@ const sortOptions: Array<{ value: SortOption; label: string }> = [
 
 export function SortBar({ value, onChange }: SortBarProps) {
   return (
-    <div className="flex w-full items-center gap-1 overflow-x-auto border-y border-[#1e1e1e] bg-[#0f0f0f] py-3">
-      <span className="shrink-0 text-xs text-[#555]">Sort by</span>
-      {sortOptions.map((opt) => (
-        <button
-          key={opt.value}
-          type="button"
-          onClick={() => onChange(opt.value)}
-          className={`shrink-0 border-b-2 px-3 py-1.5 text-xs transition-colors ${
-            value === opt.value
-              ? "border-[#4f8ef7] text-white"
-              : "border-transparent text-[#555] hover:text-white"
-          }`}
-        >
-          {opt.label}
-        </button>
-      ))}
+    <div className="flex items-center">
+      <label htmlFor="sort-by" className="sr-only">
+        Sort videos
+      </label>
+      <select
+        id="sort-by"
+        value={value}
+        onChange={(event) => onChange(event.target.value as SortOption)}
+        className="rounded-lg border border-[#1e1e1e] bg-[#0f0f0f] px-3 py-1 text-xs text-[#888] outline-none transition-colors focus:border-[#333]"
+      >
+        {sortOptions.map((opt) => (
+          <option key={opt.value} value={opt.value}>
+            Sort: {opt.label}
+          </option>
+        ))}
+      </select>
     </div>
   )
 }

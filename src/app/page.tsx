@@ -105,19 +105,19 @@ export default function Home() {
             {/* Spy Report */}
             <section className="space-y-3">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <h2 className="font-heading text-lg font-semibold tracking-tight text-white">Spy Report</h2>
-                <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                  <p className="text-xs text-[#555]">{data.videos.length} videos analyzed</p>
-                  <button
-                    type="button"
-                    onClick={() => exportToCSV(data.videos, data.channel.title)}
-                    disabled={data.videos.length === 0}
-                    className="flex h-8 items-center gap-1 rounded-lg border border-[#242424] bg-[#0f0f0f] px-3 text-xs text-[#888] transition-colors hover:border-[#444] hover:text-white disabled:opacity-50"
-                  >
-                    <Download className="h-3.5 w-3.5" />
-                    Export Report
-                  </button>
+                <div className="flex items-center">
+                  <h2 className="text-lg font-semibold text-white">Video Intel</h2>
+                  <p className="ml-3 text-sm text-[#555]">{data.videos.length} videos analyzed</p>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => exportToCSV(data.videos, data.channel.title)}
+                  disabled={data.videos.length === 0}
+                  className="inline-flex items-center gap-1 rounded-lg border border-[#242424] px-3 py-1.5 text-xs text-[#888] transition-colors hover:border-[#444] hover:text-white disabled:opacity-50"
+                >
+                  <Download className="h-3.5 w-3.5" />
+                  Export Report
+                </button>
               </div>
               <VideoGrid videos={data.videos} channelAvgViews={data.avgViews} />
             </section>

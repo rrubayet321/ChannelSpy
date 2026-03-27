@@ -10,6 +10,7 @@ import type { Video } from "@/lib/types"
 import { VideoCard } from "@/components/channel/VideoCard"
 
 type SortOption = "views" | "engagementRate" | "performanceScore" | "date" | "duration"
+type FilterPreset = "all" | "month" | "quarter" | "year"
 
 type VideoGridProps = {
   videos: Video[]
@@ -18,13 +19,11 @@ type VideoGridProps = {
 
 export function VideoGrid({ videos, channelAvgViews }: VideoGridProps) {
   const [sortBy, setSortBy] = useState<SortOption>("views")
-  const [dateFrom, setDateFrom] = useState("")
-  const [dateTo, setDateTo] = useState("")
+  const [preset, setPreset] = useState<FilterPreset>("all")
   const [minViews, setMinViews] = useState("")
 
   const filteredAndSortedVideos = useMemo(() => {
-    const fromTimestamp = dateFrom ? new Date(`${dateFrom}T00:00:00Z`).getTime() : null
-    const toTimestamp = dateTo ? new Date(`${dateTo}T23:59:59Z`).getTime() : null
+    const fromTimestamp = getPresetStartTimestamp(preset)
     const minViewsValue = Number.parseInt(minViews, 10)
     const minViewsThreshold =
       Number.isFinite(minViewsValue) && minViewsValue > 0 ? minViewsValue : 0
@@ -34,13 +33,12 @@ export function VideoGrid({ videos, channelAvgViews }: VideoGridProps) {
 
       const publishedTs = new Date(video.publishedAt).getTime()
       if (fromTimestamp !== null && publishedTs < fromTimestamp) return false
-      if (toTimestamp !== null && publishedTs > toTimestamp) return false
 
       return true
     })
 
     return [...filtered].sort((a, b) => compareVideos(a, b, sortBy))
-  }, [dateFrom, dateTo, minViews, sortBy, videos])
+  }, [preset, minViews, sortBy, videos])
 
   if (videos.length === 0) {
     return (
@@ -58,21 +56,19 @@ export function VideoGrid({ videos, channelAvgViews }: VideoGridProps) {
 
   return (
     <section className="space-y-4">
-      <div className="grid gap-3 lg:grid-cols-[auto_1fr] lg:items-start">
-        <SortBar value={sortBy} onChange={setSortBy} />
+      <p className="text-left text-xs uppercase tracking-wide text-[#444]">
+        Showing {filteredAndSortedVideos.length} of {videos.length}
+      </p>
+
+      <div className="flex flex-col gap-3 rounded-xl border-y border-[#1e1e1e] bg-[#0f0f0f] px-0 py-3 lg:flex-row lg:items-center lg:justify-between">
         <FilterPanel
-          dateFrom={dateFrom}
-          dateTo={dateTo}
+          preset={preset}
           minViews={minViews}
-          onDateFromChange={setDateFrom}
-          onDateToChange={setDateTo}
+          onPresetChange={setPreset}
           onMinViewsChange={setMinViews}
         />
+        <SortBar value={sortBy} onChange={setSortBy} />
       </div>
-
-      <p className="text-xs text-[#555]">
-        Showing {filteredAndSortedVideos.length} of {videos.length} videos
-      </p>
 
       {filteredAndSortedVideos.length === 0 ? (
         <div className="rounded-2xl border border-[#1e1e1e] bg-[#0f0f0f] p-8 text-center">
@@ -85,7 +81,7 @@ export function VideoGrid({ videos, channelAvgViews }: VideoGridProps) {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 pb-16 sm:grid-cols-2 xl:grid-cols-3">
           {filteredAndSortedVideos.map((video, index) => (
             <VideoCard key={video.id} video={video} channelAvgViews={channelAvgViews} index={index} />
           ))}
@@ -124,4 +120,17 @@ function parseDurationSeconds(duration: string): number {
   const minutes = Number.parseInt(matches[2] ?? "0", 10) || 0
   const seconds = Number.parseInt(matches[3] ?? "0", 10) || 0
   return hours * 3600 + minutes * 60 + seconds
+}
+
+function getPresetStartTimestamp(preset: FilterPreset): number | null {
+  if (preset === "all") return null
+
+  const now = new Date()
+  if (preset === "month") {
+    return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).getTime()
+  }
+  if (preset === "quarter") {
+    return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 2, 1)).getTime()
+  }
+  return new Date(Date.UTC(now.getUTCFullYear(), 0, 1)).getTime()
 }

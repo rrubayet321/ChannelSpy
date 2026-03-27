@@ -1,61 +1,56 @@
 "use client"
 
-import { Filter } from "lucide-react"
+type FilterPreset = "all" | "month" | "quarter" | "year"
 
 type FilterPanelProps = {
-  dateFrom: string
-  dateTo: string
+  preset: FilterPreset
   minViews: string
-  onDateFromChange: (value: string) => void
-  onDateToChange: (value: string) => void
+  onPresetChange: (value: FilterPreset) => void
   onMinViewsChange: (value: string) => void
 }
 
 export function FilterPanel({
-  dateFrom,
-  dateTo,
+  preset,
   minViews,
-  onDateFromChange,
-  onDateToChange,
+  onPresetChange,
   onMinViewsChange,
 }: FilterPanelProps) {
+  const options: Array<{ value: FilterPreset; label: string }> = [
+    { value: "all", label: "All time" },
+    { value: "month", label: "This month" },
+    { value: "quarter", label: "Last 3 months" },
+    { value: "year", label: "This year" },
+  ]
+
   return (
-    <div className="grid gap-3 rounded-2xl border border-[#1e1e1e] bg-[#0f0f0f] p-4 sm:grid-cols-3">
-      <div className="flex items-center gap-2 text-xs text-[#555] sm:col-span-3">
-        <Filter className="h-4 w-4" />
-        Filters
-      </div>
-
-      <label className="space-y-1 text-xs text-[#555]">
-        <span>From date</span>
-        <input
-          type="date"
-          value={dateFrom}
-          onChange={(event) => onDateFromChange(event.target.value)}
-          className="h-9 w-full rounded-lg border border-[#242424] bg-[#141414] px-2 text-sm text-[#f0f0f0] outline-none focus:border-[#444]"
-        />
-      </label>
-
-      <label className="space-y-1 text-xs text-[#555]">
-        <span>To date</span>
-        <input
-          type="date"
-          value={dateTo}
-          onChange={(event) => onDateToChange(event.target.value)}
-          className="h-9 w-full rounded-lg border border-[#242424] bg-[#141414] px-2 text-sm text-[#f0f0f0] outline-none focus:border-[#444]"
-        />
-      </label>
-
-      <label className="space-y-1 text-xs text-[#555]">
-        <span>Minimum views</span>
+    <div className="flex flex-wrap items-center gap-2">
+      {options.map((option) => {
+        const active = preset === option.value
+        return (
+          <button
+            key={option.value}
+            type="button"
+            onClick={() => onPresetChange(option.value)}
+            className={`rounded-full border px-3 py-1 text-xs transition-colors ${
+              active
+                ? "border-[#333] bg-[#1e1e1e] text-white"
+                : "border-[#1e1e1e] text-[#555] hover:text-[#888]"
+            }`}
+          >
+            {option.label}
+          </button>
+        )
+      })}
+      <label className="ml-1">
+        <span className="sr-only">Minimum views</span>
         <input
           type="number"
           min={0}
           step={1000}
           value={minViews}
           onChange={(event) => onMinViewsChange(event.target.value)}
-          placeholder="e.g. 100000"
-          className="h-9 w-full rounded-lg border border-[#242424] bg-[#141414] px-2 text-sm text-[#f0f0f0] outline-none placeholder:text-[#444] focus:border-[#444]"
+          placeholder="Min views"
+          className="w-32 rounded-lg border border-[#1e1e1e] bg-[#0f0f0f] px-3 py-1 text-xs text-[#888] outline-none placeholder:text-[#333] focus:border-[#333]"
         />
       </label>
     </div>
