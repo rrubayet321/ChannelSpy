@@ -11,7 +11,6 @@ import {
   YAxis,
 } from "recharts"
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import type { ChannelAnalytics } from "@/lib/types"
 import { formatViews } from "@/lib/utils"
 
@@ -34,44 +33,39 @@ export function TopVideosChart({ analytics }: TopVideosChartProps) {
   }, [analytics])
 
   return (
-    <Card className="border-[var(--border)] bg-[var(--bg-card)]">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium text-[var(--text-primary)]">
-          Top 10 Videos by Views
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="h-80 pt-2">
+    <div className="rounded-2xl border border-[#1e1e1e] bg-[#0f0f0f] p-5">
+      <p className="mb-3 text-sm font-medium text-white">Top 10 Videos by Views</p>
+      <div className="h-80 min-w-[700px] overflow-x-auto">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chartData} layout="vertical" margin={{ top: 8, right: 12, left: 24, bottom: 8 }}>
-            <CartesianGrid stroke="var(--border-subtle)" strokeDasharray="3 3" />
+            <CartesianGrid stroke="#1e1e1e" strokeDasharray="3 3" />
             <XAxis
               type="number"
-              tick={{ fill: "var(--text-secondary)", fontSize: 11 }}
+              tick={{ fill: "#555", fontSize: 11 }}
               tickFormatter={(value) => formatViews(Number(value))}
             />
             <YAxis
               type="category"
               dataKey="title"
-              tick={{ fill: "var(--text-secondary)", fontSize: 11 }}
+              tick={{ fill: "#555", fontSize: 11 }}
               width={130}
             />
             <Tooltip
               contentStyle={{
-                backgroundColor: "var(--bg-secondary)",
-                border: "1px solid var(--border)",
-                color: "var(--text-primary)",
+                backgroundColor: "#141414",
+                border: "1px solid #242424",
+                borderRadius: "0.75rem",
+                color: "#f0f0f0",
               }}
-              labelStyle={{ color: "var(--text-primary)" }}
+              labelStyle={{ color: "#f0f0f0" }}
               formatter={(value: unknown) => formatViews(Number(value ?? 0))}
-              labelFormatter={(_, payload) =>
-                payload?.[0]?.payload?.fullTitle ?? "Video"
-              }
+              labelFormatter={(_, payload) => payload?.[0]?.payload?.fullTitle ?? "Video"}
             />
-            <Bar dataKey="viewCount" fill="var(--accent-green)" radius={[4, 4, 4, 4]} />
+            <Bar dataKey="viewCount" fill="#3ecf8e" radius={[4, 4, 4, 4]} />
           </BarChart>
         </ResponsiveContainer>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   )
 }
 

@@ -1,4 +1,3 @@
-import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 
 type MetricTone = "green" | "blue" | "amber" | "red" | "neutral"
@@ -9,20 +8,22 @@ type MetricBadgeProps = {
 }
 
 const toneClassMap: Record<MetricTone, string> = {
-  green: "border-emerald-500/40 bg-emerald-500/10 text-emerald-300",
-  blue: "border-blue-500/40 bg-blue-500/10 text-blue-300",
-  amber: "border-amber-500/40 bg-amber-500/10 text-amber-300",
-  red: "border-red-500/40 bg-red-500/10 text-red-300",
-  neutral: "border-zinc-700 bg-zinc-800 text-zinc-300",
+  green: "border-[#3ecf8e]/30 bg-[#3ecf8e]/10 text-[#3ecf8e]",
+  blue: "border-[#4f8ef7]/30 bg-[#4f8ef7]/10 text-[#4f8ef7]",
+  amber: "border-[#f5a623]/30 bg-[#f5a623]/10 text-[#f5a623]",
+  red: "border-[#f04444]/30 bg-[#f04444]/10 text-[#f04444]",
+  neutral: "border-[#242424] bg-[#141414] text-[#888]",
 }
 
 export function MetricBadge({ label, tone = "neutral" }: MetricBadgeProps) {
   return (
-    <Badge
-      variant="outline"
-      className={cn("rounded-md px-2 py-0.5 text-xs font-medium", toneClassMap[tone])}
+    <span
+      className={cn(
+        "inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-medium",
+        toneClassMap[tone],
+      )}
     >
       {label}
-    </Badge>
+    </span>
   )
 }

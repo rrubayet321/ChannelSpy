@@ -1,6 +1,5 @@
 import Image from "next/image"
 
-import { Card, CardContent } from "@/components/ui/card"
 import type { Channel } from "@/lib/types"
 import { formatViews } from "@/lib/utils"
 
@@ -12,9 +11,9 @@ export function ChannelHeader({ channel }: ChannelHeaderProps) {
   const handle = channel.handle ? `@${channel.handle}` : ""
 
   return (
-    <Card className="border-zinc-800 bg-zinc-900/70">
-      <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center">
-        <div className="relative h-16 w-16 overflow-hidden rounded-full border border-zinc-700">
+    <div className="rounded-2xl border border-[#1e1e1e] bg-[#0f0f0f] p-5">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+        <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full ring-1 ring-[#242424]">
           <Image
             src={channel.thumbnailUrl || "/vercel.svg"}
             alt={channel.title}
@@ -24,27 +23,24 @@ export function ChannelHeader({ channel }: ChannelHeaderProps) {
           />
         </div>
         <div className="min-w-0 flex-1">
-          <h2 className="truncate text-xl font-semibold tracking-tight text-zinc-100">
-            {channel.title}
-          </h2>
-          <p className="text-sm text-zinc-400">{handle}</p>
-          <div className="mt-2 grid gap-2 text-xs text-zinc-400 sm:grid-cols-3">
-            <p>
-              Subscribers:{" "}
-              <span className="font-mono text-zinc-100">
-                {formatViews(channel.subscriberCount)}
-              </span>
-            </p>
-            <p>
-              Total views:{" "}
-              <span className="font-mono text-zinc-100">{formatViews(channel.viewCount)}</span>
-            </p>
-            <p>
-              Videos: <span className="font-mono text-zinc-100">{formatViews(channel.videoCount)}</span>
-            </p>
+          <h2 className="truncate text-2xl font-bold text-white">{channel.title}</h2>
+          <p className="text-sm text-[#555]">{handle}</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <StatPill label="Subscribers" value={formatViews(channel.subscriberCount)} />
+            <StatPill label="Total views" value={formatViews(channel.viewCount)} />
+            <StatPill label="Videos" value={formatViews(channel.videoCount)} />
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
+  )
+}
+
+function StatPill({ label, value }: { label: string; value: string }) {
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-lg border border-[#1e1e1e] bg-[#141414] px-3 py-1 text-sm">
+      <span className="text-[#555]">{label}</span>
+      <span className="font-mono text-white">{value}</span>
+    </span>
   )
 }

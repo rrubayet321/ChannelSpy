@@ -3,9 +3,6 @@
 import { FormEvent, useState } from "react"
 import { Loader2, Search } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-
 type SearchInputProps = {
   isLoading: boolean
   onAnalyze: (input: string) => Promise<unknown> | void
@@ -27,28 +24,25 @@ export function SearchInput({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="w-full space-y-3">
+    <form onSubmit={handleSubmit} className="w-full">
       <div className="flex flex-col gap-3 sm:flex-row">
-        <Input
+        <input
           value={value}
           onChange={(event) => setValue(event.target.value)}
           disabled={isLoading}
           placeholder={placeholder}
-          className="h-12 border-zinc-700 bg-zinc-900 text-zinc-100 placeholder:text-zinc-500"
           aria-label="YouTube channel input"
+          className="h-12 flex-1 rounded-xl border border-[#242424] bg-[#0f0f0f] px-4 text-sm text-[#f0f0f0] outline-none transition-colors placeholder:text-[#444] focus:border-[#444] disabled:opacity-50"
         />
-        <Button
+        <button
           type="submit"
           disabled={isLoading || value.trim().length === 0}
-          className="h-12 min-w-28 bg-zinc-100 text-zinc-900 hover:bg-zinc-300"
+          className="flex h-12 min-w-[120px] items-center justify-center gap-2 rounded-xl bg-white px-6 text-sm font-medium text-black transition-colors hover:bg-[#e0e0e0] disabled:opacity-50"
         >
           {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
           {isLoading ? "Scanning..." : "Analyze"}
-        </Button>
+        </button>
       </div>
-      <p className="text-xs text-zinc-500">
-        Supports `@handle`, `/channel/...`, `/c/...`, and bare handles.
-      </p>
     </form>
   )
 }

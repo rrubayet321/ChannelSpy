@@ -20,33 +20,33 @@ export function FilterPanel({
   onMinViewsChange,
 }: FilterPanelProps) {
   return (
-    <div className="grid gap-3 rounded-lg border border-zinc-800 bg-zinc-900/70 p-3 sm:grid-cols-3">
-      <div className="flex items-center gap-2 text-xs text-zinc-400 sm:col-span-3">
+    <div className="grid gap-3 rounded-2xl border border-[#1e1e1e] bg-[#0f0f0f] p-4 sm:grid-cols-3">
+      <div className="flex items-center gap-2 text-xs text-[#555] sm:col-span-3">
         <Filter className="h-4 w-4" />
-        Filters (client-side, instant)
+        Filters
       </div>
 
-      <label className="space-y-1 text-xs text-zinc-400">
+      <label className="space-y-1 text-xs text-[#555]">
         <span>From date</span>
         <input
           type="date"
           value={dateFrom}
           onChange={(event) => onDateFromChange(event.target.value)}
-          className="h-9 w-full rounded-md border border-zinc-700 bg-zinc-900 px-2 text-sm text-zinc-100 outline-none focus:border-zinc-500"
+          className="h-9 w-full rounded-lg border border-[#242424] bg-[#141414] px-2 text-sm text-[#f0f0f0] outline-none focus:border-[#444]"
         />
       </label>
 
-      <label className="space-y-1 text-xs text-zinc-400">
+      <label className="space-y-1 text-xs text-[#555]">
         <span>To date</span>
         <input
           type="date"
           value={dateTo}
           onChange={(event) => onDateToChange(event.target.value)}
-          className="h-9 w-full rounded-md border border-zinc-700 bg-zinc-900 px-2 text-sm text-zinc-100 outline-none focus:border-zinc-500"
+          className="h-9 w-full rounded-lg border border-[#242424] bg-[#141414] px-2 text-sm text-[#f0f0f0] outline-none focus:border-[#444]"
         />
       </label>
 
-      <label className="space-y-1 text-xs text-zinc-400">
+      <label className="space-y-1 text-xs text-[#555]">
         <span>Minimum views</span>
         <input
           type="number"
@@ -55,7 +55,7 @@ export function FilterPanel({
           value={minViews}
           onChange={(event) => onMinViewsChange(event.target.value)}
           placeholder="e.g. 100000"
-          className="h-9 w-full rounded-md border border-zinc-700 bg-zinc-900 px-2 text-sm text-zinc-100 outline-none focus:border-zinc-500"
+          className="h-9 w-full rounded-lg border border-[#242424] bg-[#141414] px-2 text-sm text-[#f0f0f0] outline-none placeholder:text-[#444] focus:border-[#444]"
         />
       </label>
     </div>

@@ -44,12 +44,12 @@ export function VideoGrid({ videos, channelAvgViews }: VideoGridProps) {
 
   if (videos.length === 0) {
     return (
-      <div className="rounded-xl border border-zinc-800 bg-zinc-900/70 p-8 text-center">
-        <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full border border-zinc-700 bg-zinc-800/60">
-          <FileSearch className="h-6 w-6 text-zinc-400" />
+      <div className="rounded-2xl border border-[#1e1e1e] bg-[#0f0f0f] p-8 text-center">
+        <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full border border-[#242424] bg-[#141414]">
+          <FileSearch className="h-6 w-6 text-[#555]" />
         </div>
-        <p className="text-sm font-medium text-zinc-200">Spy Report is empty.</p>
-        <p className="mt-1 text-xs text-zinc-400">
+        <p className="text-sm font-medium text-white">Spy Report is empty.</p>
+        <p className="mt-1 text-xs text-[#555]">
           We found the channel, but no videos were returned to analyze yet.
         </p>
       </div>
@@ -70,20 +70,22 @@ export function VideoGrid({ videos, channelAvgViews }: VideoGridProps) {
         />
       </div>
 
-      <p className="text-xs text-zinc-400">
+      <p className="text-xs text-[#555]">
         Showing {filteredAndSortedVideos.length} of {videos.length} videos
       </p>
 
       {filteredAndSortedVideos.length === 0 ? (
-        <div className="rounded-xl border border-zinc-800 bg-zinc-900/70 p-8 text-center">
-          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full border border-zinc-700 bg-zinc-800/60">
-            <FileSearch className="h-6 w-6 text-zinc-400" />
+        <div className="rounded-2xl border border-[#1e1e1e] bg-[#0f0f0f] p-8 text-center">
+          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full border border-[#242424] bg-[#141414]">
+            <FileSearch className="h-6 w-6 text-[#555]" />
           </div>
-          <p className="text-sm font-medium text-zinc-200">No intel matches these filters.</p>
-          <p className="mt-1 text-xs text-zinc-400">Try widening date range or lowering minimum views.</p>
+          <p className="text-sm font-medium text-white">No intel matches these filters.</p>
+          <p className="mt-1 text-xs text-[#555]">
+            Try widening date range or lowering minimum views.
+          </p>
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {filteredAndSortedVideos.map((video, index) => (
             <VideoCard key={video.id} video={video} channelAvgViews={channelAvgViews} index={index} />
           ))}

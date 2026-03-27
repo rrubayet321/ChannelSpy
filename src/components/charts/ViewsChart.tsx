@@ -11,7 +11,6 @@ import {
   YAxis,
 } from "recharts"
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import type { ChannelAnalytics } from "@/lib/types"
 import { formatViews } from "@/lib/utils"
 
@@ -36,45 +35,40 @@ export function ViewsChart({ analytics }: ViewsChartProps) {
   }, [analytics])
 
   return (
-    <Card className="border-[var(--border)] bg-[var(--bg-card)]">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium text-[var(--text-primary)]">
-          Views Trend (Last 20 Videos)
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="h-72 pt-2">
+    <div className="rounded-2xl border border-[#1e1e1e] bg-[#0f0f0f] p-5">
+      <p className="mb-3 text-sm font-medium text-white">Views Trend (Last 20 Videos)</p>
+      <div className="h-72 min-w-[640px] overflow-x-auto">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={chartData} margin={{ top: 8, right: 8, left: 8, bottom: 8 }}>
-            <CartesianGrid stroke="var(--border-subtle)" strokeDasharray="3 3" />
-            <XAxis dataKey="title" tick={{ fill: "var(--text-secondary)", fontSize: 11 }} />
+            <CartesianGrid stroke="#1e1e1e" strokeDasharray="3 3" />
+            <XAxis dataKey="title" tick={{ fill: "#555", fontSize: 11 }} />
             <YAxis
-              tick={{ fill: "var(--text-secondary)", fontSize: 11 }}
+              tick={{ fill: "#555", fontSize: 11 }}
               tickFormatter={(value) => formatViews(Number(value))}
             />
             <Tooltip
               contentStyle={{
-                backgroundColor: "var(--bg-secondary)",
-                border: "1px solid var(--border)",
-                color: "var(--text-primary)",
+                backgroundColor: "#141414",
+                border: "1px solid #242424",
+                borderRadius: "0.75rem",
+                color: "#f0f0f0",
               }}
-              labelStyle={{ color: "var(--text-primary)" }}
+              labelStyle={{ color: "#f0f0f0" }}
               formatter={(value: unknown) => formatViews(Number(value ?? 0))}
-              labelFormatter={(_, payload) =>
-                payload?.[0]?.payload?.fullTitle ?? "Video"
-              }
+              labelFormatter={(_, payload) => payload?.[0]?.payload?.fullTitle ?? "Video"}
             />
             <Line
               type="monotone"
               dataKey="viewCount"
-              stroke="var(--accent-blue)"
+              stroke="#4f8ef7"
               strokeWidth={2}
-              dot={{ r: 2, fill: "var(--accent-blue)" }}
-              activeDot={{ r: 4, fill: "var(--accent-blue)" }}
+              dot={{ r: 2, fill: "#4f8ef7" }}
+              activeDot={{ r: 4, fill: "#4f8ef7" }}
             />
           </LineChart>
         </ResponsiveContainer>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   )
 }
 
