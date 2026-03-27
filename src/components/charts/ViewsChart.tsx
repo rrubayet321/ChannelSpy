@@ -11,16 +11,16 @@ import {
   YAxis,
 } from "recharts"
 
-import type { ChannelAnalytics } from "@/lib/types"
+import type { Video } from "@/lib/types"
 import { formatViews } from "@/lib/utils"
 
 type ViewsChartProps = {
-  analytics: ChannelAnalytics
+  videos: Video[]
 }
 
-export function ViewsChart({ analytics }: ViewsChartProps) {
+export function ViewsChart({ videos }: ViewsChartProps) {
   const chartData = useMemo(() => {
-    return [...analytics.videos]
+    return [...videos]
       .sort(
         (a, b) =>
           new Date(a.publishedAt).getTime() - new Date(b.publishedAt).getTime(),
@@ -32,12 +32,12 @@ export function ViewsChart({ analytics }: ViewsChartProps) {
         fullTitle: video.title,
         viewCount: video.viewCount,
       }))
-  }, [analytics])
+  }, [videos])
 
   return (
-    <div className="rounded-2xl border border-[#1e1e1e] bg-[#0f0f0f] p-5">
+    <div className="overflow-hidden rounded-2xl border border-[#1e1e1e] bg-[#0f0f0f] p-5">
       <p className="mb-3 text-sm font-medium text-white">Views Trend (Last 20 Videos)</p>
-      <div className="h-72 min-w-[640px] overflow-x-auto">
+      <div className="h-72 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={chartData} margin={{ top: 8, right: 8, left: 8, bottom: 8 }}>
             <CartesianGrid stroke="#1e1e1e" strokeDasharray="3 3" />

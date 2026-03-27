@@ -11,16 +11,16 @@ import {
   YAxis,
 } from "recharts"
 
-import type { ChannelAnalytics } from "@/lib/types"
+import type { Video } from "@/lib/types"
 import { formatViews } from "@/lib/utils"
 
 type TopVideosChartProps = {
-  analytics: ChannelAnalytics
+  videos: Video[]
 }
 
-export function TopVideosChart({ analytics }: TopVideosChartProps) {
+export function TopVideosChart({ videos }: TopVideosChartProps) {
   const chartData = useMemo(() => {
-    return [...analytics.videos]
+    return [...videos]
       .sort((a, b) => b.viewCount - a.viewCount)
       .slice(0, 10)
       .map((video) => ({
@@ -30,12 +30,12 @@ export function TopVideosChart({ analytics }: TopVideosChartProps) {
         viewCount: video.viewCount,
       }))
       .reverse()
-  }, [analytics])
+  }, [videos])
 
   return (
-    <div className="rounded-2xl border border-[#1e1e1e] bg-[#0f0f0f] p-5">
+    <div className="overflow-hidden rounded-2xl border border-[#1e1e1e] bg-[#0f0f0f] p-5">
       <p className="mb-3 text-sm font-medium text-white">Top 10 Videos by Views</p>
-      <div className="h-80 min-w-[700px] overflow-x-auto">
+      <div className="h-80 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chartData} layout="vertical" margin={{ top: 8, right: 12, left: 24, bottom: 8 }}>
             <CartesianGrid stroke="#1e1e1e" strokeDasharray="3 3" />

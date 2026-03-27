@@ -6,6 +6,7 @@ import { FileSearch } from "lucide-react"
 import { FilterPanel } from "@/components/filters/FilterPanel"
 import { SortBar } from "@/components/filters/SortBar"
 import type { Video } from "@/lib/types"
+import { parseDurationSeconds } from "@/lib/utils"
 
 import { VideoCard } from "@/components/channel/VideoCard"
 
@@ -110,16 +111,6 @@ function compareVideos(a: Video, b: Video, sortBy: SortOption): number {
 function parsePublishedAt(isoDate: string): number {
   const ts = new Date(isoDate).getTime()
   return Number.isFinite(ts) ? ts : 0
-}
-
-function parseDurationSeconds(duration: string): number {
-  const matches = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/)
-  if (!matches) return 0
-
-  const hours = Number.parseInt(matches[1] ?? "0", 10) || 0
-  const minutes = Number.parseInt(matches[2] ?? "0", 10) || 0
-  const seconds = Number.parseInt(matches[3] ?? "0", 10) || 0
-  return hours * 3600 + minutes * 60 + seconds
 }
 
 function getPresetStartTimestamp(preset: FilterPreset): number | null {

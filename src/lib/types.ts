@@ -18,6 +18,7 @@ export interface Video {
   thumbnailUrl: string
   publishedAt: string
   duration: string
+  isShort: boolean
   viewCount: number
   likeCount: number
   commentCount: number
@@ -26,13 +27,18 @@ export interface Video {
   trendDelta: number
 }
 
-export interface ChannelAnalytics {
-  channel: Channel
+export interface AnalyticsBucket {
   videos: Video[]
   avgViews: number
   avgEngagement: number
   postingFrequency: string
   topPerformers: Video[]
+}
+
+export interface ChannelAnalytics {
+  channel: Channel
+  longForm: AnalyticsBucket
+  shorts: AnalyticsBucket
 }
 
 export type ParsedChannelInputType = "handle" | "channelId" | "username"

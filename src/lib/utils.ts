@@ -29,12 +29,11 @@ export function formatRelativeDate(iso: string): string {
 }
 
 export function formatDuration(pt: string): string {
-  const matches = pt.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/)
-  if (!matches) return "0:00"
-
-  const hours = Number(matches[1] ?? 0)
-  const minutes = Number(matches[2] ?? 0)
-  const seconds = Number(matches[3] ?? 0)
+  const totalSeconds = parseDurationSeconds(pt)
+  if (totalSeconds <= 0) return "0:00"
+  const hours = Math.floor(totalSeconds / 3600)
+  const minutes = Math.floor((totalSeconds % 3600) / 60)
+  const seconds = totalSeconds % 60
 
   const totalMinutes = hours * 60 + minutes
   if (hours > 0) {
@@ -43,6 +42,20 @@ export function formatDuration(pt: string): string {
     return `${hours}:${remMinutes}:${remSeconds}`
   }
   return `${totalMinutes}:${String(seconds).padStart(2, "0")}`
+}
+
+export function parseDurationSeconds(duration: string): number {
+  const matches = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/)
+  if (!matches) return 0
+
+  const hours = Number.parseInt(matches[1] ?? "0", 10) || 0
+  const minutes = Number.parseInt(matches[2] ?? "0", 10) || 0
+  const seconds = Number.parseInt(matches[3] ?? "0", 10) || 0
+  return hours * 3600 + minutes * 60 + seconds
+}
+
+export function isShortVideo(duration: string): boolean {
+  return parseDurationSeconds(duration) <= 180
 }
 
 export function formatEngagement(n: number): string {
@@ -155,6 +168,7 @@ export function exportToCSV(videos: Video[], channelName: string): void {
     "trend delta",
     "published date",
     "duration",
+    "video type",
     "YouTube URL",
   ]
 
@@ -168,6 +182,7 @@ export function exportToCSV(videos: Video[], channelName: string): void {
     `${video.trendDelta.toFixed(2)}%`,
     escapeCsv(formatDate(video.publishedAt)),
     escapeCsv(formatDuration(video.duration)),
+    video.isShort ? "short" : "long",
     escapeCsv(`https://www.youtube.com/watch?v=${video.id}`),
   ])
 

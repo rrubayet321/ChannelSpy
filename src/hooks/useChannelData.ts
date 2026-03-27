@@ -2,11 +2,12 @@
 
 import { useCallback, useMemo, useState } from "react"
 
-import type { Channel, ChannelAnalytics, ParsedChannelInput, Video } from "@/lib/types"
+import type { AnalyticsBucket, Channel, ChannelAnalytics, ParsedChannelInput, Video } from "@/lib/types"
 import {
   calcEngagementRate,
   calcPerformanceScore,
   calcTrendDelta,
+  isShortVideo,
   parseChannelUrl,
 } from "@/lib/utils"
 
@@ -134,37 +135,23 @@ export function useChannelData(): UseChannelDataResult {
           })
           .filter((video): video is NonNullable<typeof video> => video !== null)
 
-        const avgViews = calculateAverage(mergedBase.map((video) => video.viewCount))
-        const baseWithEngagement = mergedBase.map((video) => ({
+        const baseWithEngagementAndType = mergedBase.map((video) => ({
           ...video,
+          isShort: isShortVideo(video.duration),
           engagementRate: calcEngagementRate(video.likeCount, video.commentCount, video.viewCount),
         }))
-        const avgEngagement = calculateAverage(
-          baseWithEngagement.map((video) => video.engagementRate),
+
+        const longForm = buildAnalyticsBucket(
+          baseWithEngagementAndType.filter((video) => !video.isShort),
         )
-
-        const videos: Video[] = baseWithEngagement.map((video) => {
-          const performanceScore = calcPerformanceScore(video, avgViews, avgEngagement)
-          const trendDelta = calcTrendDelta(video, avgViews)
-
-          return {
-            ...video,
-            performanceScore,
-            trendDelta,
-          }
-        })
-
-        const topPerformers = [...videos]
-          .sort((a, b) => b.performanceScore - a.performanceScore)
-          .slice(0, 3)
+        const shorts = buildAnalyticsBucket(
+          baseWithEngagementAndType.filter((video) => video.isShort),
+        )
 
         const analytics: ChannelAnalytics = {
           channel: channelResponse,
-          videos,
-          avgViews,
-          avgEngagement,
-          postingFrequency: calculatePostingFrequency(videos),
-          topPerformers,
+          longForm,
+          shorts,
         }
 
         analyticsCache.set(cacheKey, analytics)
@@ -296,6 +283,50 @@ function calculateAverage(values: number[]): number {
   if (values.length === 0) return 0
   const total = values.reduce((sum, value) => sum + value, 0)
   return total / values.length
+}
+
+function buildAnalyticsBucket(
+  videos: Array<
+    Pick<Video, "id" | "title" | "thumbnailUrl" | "publishedAt" | "duration" | "viewCount" | "likeCount" | "commentCount"> & {
+      isShort: boolean
+      engagementRate: number
+    }
+  >,
+): AnalyticsBucket {
+  if (videos.length === 0) {
+    return {
+      videos: [],
+      avgViews: 0,
+      avgEngagement: 0,
+      postingFrequency: "~N/A",
+      topPerformers: [],
+    }
+  }
+
+  const avgViews = calculateAverage(videos.map((video) => video.viewCount))
+  const avgEngagement = calculateAverage(videos.map((video) => video.engagementRate))
+
+  const enrichedVideos: Video[] = videos.map((video) => {
+    const performanceScore = calcPerformanceScore(video, avgViews, avgEngagement)
+    const trendDelta = calcTrendDelta(video, avgViews)
+    return {
+      ...video,
+      performanceScore,
+      trendDelta,
+    }
+  })
+
+  const topPerformers = [...enrichedVideos]
+    .sort((a, b) => b.performanceScore - a.performanceScore)
+    .slice(0, 3)
+
+  return {
+    videos: enrichedVideos,
+    avgViews,
+    avgEngagement,
+    postingFrequency: calculatePostingFrequency(enrichedVideos),
+    topPerformers,
+  }
 }
 
 function calculatePostingFrequency(videos: Pick<Video, "publishedAt">[]): string {
