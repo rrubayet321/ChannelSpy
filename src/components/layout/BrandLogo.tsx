@@ -14,8 +14,15 @@ function BrandMark({ className }: { className?: string }) {
   return (
     <span className={cn("brand-mark-box", className)} aria-hidden="true">
       <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="14" cy="14" r="9" stroke="var(--brand-mark-foreground)" strokeWidth="1.5" />
-        <circle cx="14" cy="14" r="3" fill="var(--brand-mark-foreground)" />
+        <rect x="5" y="5" width="18" height="18" rx="5" stroke="var(--brand-mark-foreground)" strokeWidth="1.4" />
+        <path
+          d="M9.5 18.2L14 9.7L18.5 18.2"
+          stroke="var(--brand-mark-foreground)"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path d="M11.3 14.8H16.7" stroke="var(--brand-mark-accent)" strokeWidth="1.4" strokeLinecap="round" />
       </svg>
     </span>
   )
@@ -29,12 +36,12 @@ function BrandWordmark({
   showLiveDot?: boolean
 }) {
   return (
-    <span className={cn("font-heading text-lg tracking-tight", className)}>
-      <span className="font-light text-[var(--brand-wordmark-light)]">Channel</span>
-      <span className="font-bold text-[var(--brand-wordmark-strong)]">Spy</span>
+    <span className={cn("font-heading text-lg tracking-[0.01em]", className)}>
+      <span className="font-medium text-[var(--brand-wordmark-light)]">Channel</span>
+      <span className="ml-[1px] font-semibold text-[var(--brand-wordmark-strong)]">Spy</span>
       {showLiveDot ? (
         <span
-          className="relative -top-1.5 ml-0.5 inline-block h-[6px] w-[6px] rounded-full bg-[var(--brand-live-dot)]"
+          className="relative -top-1.5 ml-1 inline-block h-[5px] w-[5px] rounded-full bg-[var(--brand-live-dot)]"
           aria-label="Live brand indicator"
         />
       ) : null}

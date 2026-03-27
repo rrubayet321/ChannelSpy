@@ -62,12 +62,13 @@
   --accent-green: #3ecf8e;
   --accent-red: #f04444;
   --accent-amber: #f5a623;
-  --brand-mark-bg: #1a1a1a;
-  --brand-mark-border: #2a2a2a;
-  --brand-mark-foreground: #ffffff;
-  --brand-live-dot: #f04444;
-  --brand-wordmark-light: #888888;
-  --brand-wordmark-strong: #f0f0f0;
+  --brand-mark-bg: #111319;
+  --brand-mark-border: #2a3040;
+  --brand-mark-foreground: #dce4f5;
+  --brand-mark-accent: #6bb0ff;
+  --brand-live-dot: #76d5ff;
+  --brand-wordmark-light: #9aa3b5;
+  --brand-wordmark-strong: #f5f7ff;
 
   --background: #080808;
   --foreground: #f0f0f0;
@@ -134,9 +135,28 @@
   animation-fill-mode: forwards;
 }
 
+@keyframes introFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.intro-fade-up {
+  animation: introFadeUp 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .video-card-enter {
     opacity: 1;
+    animation: none;
+  }
+
+  .intro-fade-up {
     animation: none;
   }
 }
@@ -148,6 +168,92 @@
   height: 2rem;
   width: 2rem;
   border: 1px solid var(--brand-mark-border);
-  border-radius: 0.5rem;
+  border-radius: 0.6rem;
   background: var(--brand-mark-bg);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 6px 18px rgba(0, 0, 0, 0.35);
+}
+
+.report-back-button {
+  display: block;
+  position: relative;
+  width: 3.25rem;
+  height: 3.25rem;
+  margin: 0;
+  overflow: hidden;
+  outline: none;
+  background-color: transparent;
+  cursor: pointer;
+  border: 0;
+}
+
+.report-back-button::before {
+  content: "";
+  position: absolute;
+  border-radius: 9999px;
+  inset: 0.35rem;
+  border: 2px solid #2d3648;
+  transition:
+    opacity 0.4s cubic-bezier(0.77, 0, 0.175, 1) 80ms,
+    transform 0.5s cubic-bezier(0.455, 0.03, 0.515, 0.955) 80ms;
+}
+
+.report-back-button::after {
+  content: "";
+  position: absolute;
+  border-radius: 9999px;
+  inset: 0.35rem;
+  border: 3px solid var(--accent-blue);
+  transform: scale(1.28);
+  transition:
+    opacity 0.4s cubic-bezier(0.165, 0.84, 0.44, 1),
+    transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  opacity: 0;
+}
+
+.report-back-button:hover::before,
+.report-back-button:focus-visible::before {
+  opacity: 0;
+  transform: scale(0.72);
+  transition:
+    opacity 0.4s cubic-bezier(0.165, 0.84, 0.44, 1),
+    transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.report-back-button:hover::after,
+.report-back-button:focus-visible::after {
+  opacity: 1;
+  transform: scale(1);
+  transition:
+    opacity 0.4s cubic-bezier(0.77, 0, 0.175, 1) 80ms,
+    transform 0.5s cubic-bezier(0.455, 0.03, 0.515, 0.955) 80ms;
+}
+
+.report-back-button-box {
+  display: flex;
+  position: absolute;
+  top: 0;
+  left: 0;
+  transition: transform 0.4s;
+}
+
+.report-back-button-elem {
+  display: block;
+  width: 1.125rem;
+  height: 1.125rem;
+  margin: 1.05rem 0.72rem 0 0.72rem;
+  transform: rotate(360deg);
+  color: var(--text-primary);
+}
+
+.report-back-button:hover .report-back-button-box,
+.report-back-button:focus-visible .report-back-button-box {
+  transform: translateX(-3.25rem);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .report-back-button::before,
+  .report-back-button::after,
+  .report-back-button-box {
+    transition: none;
+  }
 }

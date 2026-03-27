@@ -14,6 +14,8 @@ import {
 import type { Video } from "@/lib/types"
 import { formatViews } from "@/lib/utils"
 
+import { tooltipHideCursor } from "@/components/charts/chartInteraction"
+
 type ViewsChartProps = {
   videos: Video[]
 }
@@ -35,26 +37,27 @@ export function ViewsChart({ videos }: ViewsChartProps) {
   }, [videos])
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-[#1e1e1e] bg-[#0f0f0f] p-5">
-      <p className="mb-3 text-sm font-medium text-white">View Trend (Latest 20 Uploads)</p>
+    <div className="overflow-hidden rounded-2xl border border-[#222833] bg-[#0f131a] p-5">
+      <p className="mb-3 text-sm font-semibold text-white">View Trend (Latest 20 Uploads)</p>
       <div className="h-72 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={chartData} margin={{ top: 8, right: 8, left: 8, bottom: 8 }}>
-            <CartesianGrid stroke="#1e1e1e" strokeDasharray="3 3" />
-            <XAxis dataKey="title" tick={{ fill: "#555", fontSize: 11 }} />
+            <CartesianGrid stroke="#273041" strokeDasharray="3 3" />
+            <XAxis dataKey="title" tick={{ fill: "#7b8499", fontSize: 11 }} />
             <YAxis
-              tick={{ fill: "#555", fontSize: 11 }}
+              tick={{ fill: "#7b8499", fontSize: 11 }}
               tickFormatter={(value) => formatViews(Number(value))}
             />
             <Tooltip
+              {...tooltipHideCursor}
               contentStyle={{
-                backgroundColor: "#141414",
-                border: "1px solid #242424",
+                backgroundColor: "#141a24",
+                border: "1px solid #2b3343",
                 borderRadius: "0.75rem",
                 color: "#f0f0f0",
               }}
               labelStyle={{ color: "#f0f0f0" }}
-              formatter={(value: unknown) => formatViews(Number(value ?? 0))}
+              formatter={(value: unknown) => [formatViews(Number(value ?? 0)), "Views"]}
               labelFormatter={(_, payload) => payload?.[0]?.payload?.fullTitle ?? "Video"}
             />
             <Line
@@ -63,7 +66,13 @@ export function ViewsChart({ videos }: ViewsChartProps) {
               stroke="#4f8ef7"
               strokeWidth={2}
               dot={{ r: 2, fill: "#4f8ef7" }}
-              activeDot={{ r: 4, fill: "#4f8ef7" }}
+              activeDot={{
+                r: 6,
+                fill: "#4f8ef7",
+                stroke: "#9ec5ff",
+                strokeWidth: 2,
+                style: { filter: "drop-shadow(0 0 8px rgba(79, 142, 247, 0.55))" },
+              }}
             />
           </LineChart>
         </ResponsiveContainer>

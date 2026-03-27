@@ -1,38 +1,107 @@
+.loaderWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  user-select: none;
+  color: #f0f0f0;
+}
+
 .loader {
-  --uib-size: 64px;
-  --uib-color: #f0f0f0;
-  --uib-speed: 1.9s;
-  --uib-bg-opacity: 0.2;
-
-  height: var(--uib-size);
-  width: var(--uib-size);
-  transform-origin: center;
-  overflow: visible;
+  width: 20px;
+  height: 20px;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  background-color: transparent;
+  animation: loaderRotate 1.5s linear infinite;
+  z-index: 0;
 }
 
-.car {
-  fill: none;
-  stroke: var(--uib-color);
-  stroke-dasharray: 15 85;
-  stroke-dashoffset: 0;
-  stroke-linecap: round;
-  animation: travel var(--uib-speed) linear infinite;
-  will-change: stroke-dasharray, stroke-dashoffset;
-  transition: stroke 1s ease;
-}
-
-.track {
-  stroke: var(--uib-color);
-  opacity: var(--uib-bg-opacity);
-  transition: stroke 1s ease;
-}
-
-@keyframes travel {
+@keyframes loaderRotate {
   0% {
-    stroke-dashoffset: 0;
+    transform: rotate(90deg);
+    box-shadow:
+      0 1px 1px 0 #fff inset,
+      0 3px 5px 0 #ff5f9f inset,
+      0 4px 4px 0 #0693ff inset;
   }
-
+  50% {
+    transform: rotate(270deg);
+    background: #7c0911;
+    box-shadow:
+      0 1px 1px 0 #fff inset,
+      0 3px 5px 0 #d60a47 inset,
+      0 4px 4px 0 #fbef19 inset;
+  }
   100% {
-    stroke-dashoffset: -100;
+    transform: rotate(450deg);
+    box-shadow:
+      0 1px 1px 0 #fff inset,
+      0 3px 5px 0 #ff5f9f inset,
+      0 4px 4px 0 #28a9ff inset;
+  }
+}
+
+.letterWrapper {
+  display: flex;
+  gap: 1px;
+}
+
+.loaderLetter {
+  display: inline-block;
+  opacity: 0.4;
+  transform: translateY(0);
+  animation: loaderLetterAnim 2s infinite;
+  z-index: 1;
+  border-radius: 50ch;
+  border: none;
+  color: #4f8ef7;
+}
+
+.loaderLetter:nth-child(1) {
+  animation-delay: 0s;
+}
+.loaderLetter:nth-child(2) {
+  animation-delay: 0.1s;
+}
+.loaderLetter:nth-child(3) {
+  animation-delay: 0.2s;
+}
+.loaderLetter:nth-child(4) {
+  animation-delay: 0.3s;
+}
+.loaderLetter:nth-child(5) {
+  animation-delay: 0.4s;
+}
+.loaderLetter:nth-child(6) {
+  animation-delay: 0.5s;
+}
+.loaderLetter:nth-child(7) {
+  animation-delay: 0.6s;
+}
+.loaderLetter:nth-child(8) {
+  animation-delay: 0.7s;
+}
+.loaderLetter:nth-child(9) {
+  animation-delay: 0.8s;
+}
+.loaderLetter:nth-child(10) {
+  animation-delay: 0.9s;
+}
+
+@keyframes loaderLetterAnim {
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: translateY(0);
+  }
+  20% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+  40% {
+    opacity: 0.7;
+    transform: translateY(0);
   }
 }

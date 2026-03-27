@@ -11,9 +11,9 @@ export function cn(...inputs: ClassValue[]) {
 export function formatViews(n: number): string {
   if (!Number.isFinite(n) || n < 0) return "0"
   if (n < 1000) return `${Math.round(n)}`
-  if (n < 1_000_000) return `${(n / 1000).toFixed(1).replace(/\.0$/, "")}K`
-  if (n < 1_000_000_000) return `${(n / 1_000_000).toFixed(1).replace(/\.0$/, "")}M`
-  return `${(n / 1_000_000_000).toFixed(1).replace(/\.0$/, "")}B`
+  if (n < 1_000_000) return compactNumber(`${(n / 1000).toFixed(1).replace(/\.0$/, "")}K`)
+  if (n < 1_000_000_000) return compactNumber(`${(n / 1_000_000).toFixed(1).replace(/\.0$/, "")}M`)
+  return compactNumber(`${(n / 1_000_000_000).toFixed(1).replace(/\.0$/, "")}B`)
 }
 
 export function formatDate(iso: string): string {
@@ -203,4 +203,9 @@ export function exportToCSV(videos: Video[], channelName: string): void {
 function escapeCsv(value: string): string {
   const escaped = value.replace(/"/g, '""')
   return `"${escaped}"`
+}
+
+function compactNumber(value: string): string {
+  // Remove normal/nbsp/narrow-nbsp whitespace to prevent "125 . 3K" artifacts.
+  return value.replace(/[\s\u00A0\u202F]+/g, "")
 }

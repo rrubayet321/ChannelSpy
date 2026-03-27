@@ -46,8 +46,8 @@ export function VideoGrid({ videos, channelAvgViews }: VideoGridProps) {
 
   if (videos.length === 0) {
     return (
-      <div className="rounded-2xl border border-[#1e1e1e] bg-[#0f0f0f] p-8 text-center">
-        <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full border border-[#242424] bg-[#141414]">
+      <div className="rounded-2xl border border-[#222833] bg-[#0f131a] p-8 text-center">
+        <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full border border-[#2d3648] bg-[#151b26]">
           <FileSearch className="h-6 w-6 text-[#555]" />
         </div>
         <p className="text-sm font-medium text-white">Spy Report is empty.</p>
@@ -59,14 +59,14 @@ export function VideoGrid({ videos, channelAvgViews }: VideoGridProps) {
   }
 
   return (
-    <section className="space-y-4">
-      <p className="text-left text-xs uppercase tracking-wide text-[#444]">
+    <section className="space-y-5">
+      <p className="text-left text-xs uppercase tracking-[0.14em] text-[#6f788c]">
         Showing {filteredAndSortedVideos.length} of {videos.length}
       </p>
 
-      <div className="space-y-3 rounded-xl border-y border-[#1e1e1e] bg-[#0f0f0f] px-0 py-3">
+      <div className="space-y-3 rounded-2xl border border-[#222833] bg-[#0f131a] px-4 py-4">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs text-[#666]">
+          <p className="text-xs text-[#818aa0]">
             Essentials first: sort quickly, then open advanced filters if needed.
           </p>
           <div className="flex items-center gap-2">
@@ -74,7 +74,7 @@ export function VideoGrid({ videos, channelAvgViews }: VideoGridProps) {
             <button
               type="button"
               onClick={() => setAdvancedOpen((current) => !current)}
-              className="rounded-lg border border-[#1e1e1e] bg-[#0f0f0f] px-3 py-1 text-xs text-[#888] transition-colors hover:border-[#333] hover:text-white"
+              className="rounded-lg border border-[#2c3340] bg-[#131826] px-3 py-1 text-xs text-[#aeb6c8] transition-colors hover:border-[#4b5671] hover:text-white"
             >
               {advancedOpen ? "Hide advanced" : "Advanced filters"}
             </button>
@@ -82,7 +82,7 @@ export function VideoGrid({ videos, channelAvgViews }: VideoGridProps) {
         </div>
 
         {advancedOpen && (
-          <div className="flex flex-col gap-2 border-t border-[#1a1a1a] pt-3">
+          <div className="flex flex-col gap-2 border-t border-[#1d2430] pt-3">
             <FilterPanel
               preset={preset}
               minViews={minViews}
@@ -96,7 +96,7 @@ export function VideoGrid({ videos, channelAvgViews }: VideoGridProps) {
                   setPreset("all")
                   setMinViews("")
                 }}
-                className="self-start rounded-lg border border-[#1e1e1e] px-2.5 py-1 text-xs text-[#888] transition-colors hover:border-[#333] hover:text-white"
+                className="self-start rounded-lg border border-[#2c3340] px-2.5 py-1 text-xs text-[#aeb6c8] transition-colors hover:border-[#4b5671] hover:text-white"
               >
                 Reset advanced filters
               </button>
@@ -106,8 +106,8 @@ export function VideoGrid({ videos, channelAvgViews }: VideoGridProps) {
       </div>
 
       {filteredAndSortedVideos.length === 0 ? (
-        <div className="rounded-2xl border border-[#1e1e1e] bg-[#0f0f0f] p-8 text-center">
-          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full border border-[#242424] bg-[#141414]">
+        <div className="rounded-2xl border border-[#222833] bg-[#0f131a] p-8 text-center">
+          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full border border-[#2d3648] bg-[#151b26]">
             <FileSearch className="h-6 w-6 text-[#555]" />
           </div>
           <p className="text-sm font-medium text-white">No intel matches these filters.</p>

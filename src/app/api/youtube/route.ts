@@ -103,6 +103,7 @@ async function handleChannelAction(params: URLSearchParams, apiKey: string) {
   const image = asRecord(brandingSettings?.image)
   const thumbnails = asRecord(snippet?.thumbnails)
   const highThumb = asRecord(thumbnails?.high)
+  const mediumThumb = asRecord(thumbnails?.medium)
   const defaultThumb = asRecord(thumbnails?.default)
   const status = asRecord(item?.status)
   const relatedPlaylists = asRecord(contentDetails?.relatedPlaylists)
@@ -113,7 +114,7 @@ async function handleChannelAction(params: URLSearchParams, apiKey: string) {
       title: asString(snippet?.title),
       handle: asString(snippet?.customUrl).replace(/^@/, ""),
       description: asString(snippet?.description),
-      thumbnailUrl: asString(highThumb?.url) || asString(defaultThumb?.url),
+      thumbnailUrl: asString(highThumb?.url) || asString(mediumThumb?.url) || asString(defaultThumb?.url),
       bannerUrl: asOptionalString(image?.bannerExternalUrl),
       subscriberCount: safeNumber(statistics?.subscriberCount),
       videoCount: safeNumber(statistics?.videoCount),
