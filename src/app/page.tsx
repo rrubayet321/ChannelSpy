@@ -99,19 +99,19 @@ export default function Home() {
           <>
             <section className="mx-auto mb-12 max-w-3xl text-center">
               <span className="mb-5 inline-flex items-center rounded-full border border-[#242424] px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-[#666]">
-                Competitor intelligence platform
+                YouTube channel insights
               </span>
 
               <h1 className="font-heading text-5xl font-bold leading-[1.1] tracking-tight text-white md:text-6xl">
                 Turn any YouTube channel
                 <br />
                 <span className="bg-gradient-to-r from-white to-[#888] bg-clip-text text-transparent">
-                  into actionable intel.
+                  into clear insights.
                 </span>
               </h1>
 
               <p className="mx-auto mt-5 max-w-lg text-base text-[#666]">
-                Paste a channel URL and instantly scan views, engagement, trend velocity, and top performers.
+                Paste a channel URL to quickly see views, audience response, recent growth, and top videos.
               </p>
 
               <div className="mt-8">
@@ -129,15 +129,15 @@ export default function Home() {
                 </span>
                 <span className="flex items-center gap-1.5">
                   <span className="inline-block h-1.5 w-1.5 rounded-full bg-[#3ecf8e]" />
-                  Instant client-side filters
+                  Fast filtering
                 </span>
               </div>
             </section>
 
             <section className="mb-8 grid gap-3 sm:grid-cols-3">
               <FeatureCard label="Inputs" description="Handle, channel ID, custom URL, and full channel links." />
-              <FeatureCard label="Signals" description="Performance score, engagement ratios, and trend delta vs average." />
-              <FeatureCard label="Output" description="Exportable report-ready video intel in one click." />
+              <FeatureCard label="Metrics" description="Views, audience response, and recent growth compared with normal performance." />
+              <FeatureCard label="Output" description="Export a video report in one click." />
             </section>
           </>
         )}
@@ -156,7 +156,7 @@ export default function Home() {
                       <ArrowLeft className="h-3.5 w-3.5" />
                       Back
                     </button>
-                    <span className="text-xs uppercase tracking-[0.16em] text-[#555]">Channel analytics</span>
+                    <span className="text-xs uppercase tracking-[0.16em] text-[#555]">Channel report</span>
                   </div>
                   <div className="inline-flex rounded-xl border border-[#1e1e1e] bg-[#0b0b0b] p-1">
                     <button
@@ -214,7 +214,7 @@ export default function Home() {
             {!isLoading && data && activeBucket && (
               <>
                 <p className="text-center text-sm text-[#3ecf8e]">
-                  {activeTab === "long" ? "Long-form intel ready." : "Shorts intel ready."}
+                  {activeTab === "long" ? "Long video report is ready." : "Shorts report is ready."}
                 </p>
                 <p className="text-center text-xs text-[#666]">
                   How to read this dashboard: check overview first, then trends, then open the video list for actions.
@@ -222,7 +222,6 @@ export default function Home() {
                 <ChannelHeader channel={data.channel} />
                 <GuidedInsightSummary cards={guidedCards} onAction={handleGuidedAction} />
 
-            {/* KPI row */}
             <section id="overview-section" className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
               <KpiCard
                 title="Typical Views"
@@ -276,24 +275,23 @@ export default function Home() {
             {!showDetailedSections && (
               <section className="rounded-2xl border border-[#1e1e1e] bg-[#0f0f0f] p-4">
                 <p className="text-sm text-[#adadad]">
-                  Essentials are shown above. Open detailed analytics when you are ready for deeper breakdowns.
+                  The key numbers are shown above. Open detailed charts when you are ready for a deeper view.
                 </p>
                 <button
                   type="button"
                   onClick={() => setShowDetailedSections(true)}
                   className="mt-3 inline-flex items-center rounded-lg border border-[#2b2b2b] px-3 py-1.5 text-xs text-[#d2d2d2] transition-colors hover:border-[#444] hover:text-white"
                 >
-                  Show detailed analytics
+                  Show detailed charts
                 </button>
               </section>
             )}
 
-            {/* Charts */}
             {showDetailedSections && (
             <section id="trends-section" className="space-y-3">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <h2 className="font-heading text-lg font-semibold tracking-tight text-white">Trends</h2>
-                <p className="text-xs text-[#555]">{activeTab === "long" ? "Long videos view" : "Shorts view"}</p>
+                <p className="text-xs text-[#555]">{activeTab === "long" ? "Long videos" : "Shorts"}</p>
               </div>
               <p className="text-xs text-[#666]">
                 See what is accelerating, what is stable, and which uploads are beating the channel baseline.
@@ -307,7 +305,6 @@ export default function Home() {
             </section>
             )}
 
-            {/* Spy Report */}
             {showDetailedSections && (
             <section id="videos-section" className="space-y-3">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -470,8 +467,8 @@ function ErrorState({
         <div className="flex items-start gap-3 text-sm">
           <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-[#f5a623]" />
           <div>
-            <p className="font-medium text-white">Spy Report unavailable: quota reached.</p>
-            <p className="mt-1 text-[#888]">YouTube API daily quota is exhausted. Please retry later or switch API key.</p>
+            <p className="font-medium text-white">Channel report unavailable: limit reached.</p>
+            <p className="mt-1 text-[#888]">The daily YouTube request limit has been reached. Please try again later.</p>
           </div>
         </div>
       </div>
@@ -484,7 +481,7 @@ function ErrorState({
         <div className="flex items-start gap-3 text-sm">
           <SearchX className="mt-0.5 h-4 w-4 shrink-0 text-[#4f8ef7]" />
           <div>
-            <p className="font-medium text-white">No channel intel found.</p>
+            <p className="font-medium text-white">No channel data found.</p>
             <p className="mt-1 text-[#888]">Check the channel URL or handle and try again.</p>
           </div>
         </div>
