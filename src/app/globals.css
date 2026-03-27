@@ -49,6 +49,18 @@
 }
 
 :root {
+  --bg-primary: #0a0a0a;
+  --bg-secondary: #111111;
+  --bg-card: #161616;
+  --bg-hover: #1c1c1c;
+  --border-subtle: #1f1f1f;
+  --text-primary: #f5f5f5;
+  --text-secondary: #a1a1a1;
+  --text-muted: #525252;
+  --accent-blue: #3b82f6;
+  --accent-green: #22c55e;
+  --accent-red: #ef4444;
+  --accent-amber: #f59e0b;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -84,6 +96,18 @@
 }
 
 .dark {
+  --bg-primary: #0a0a0a;
+  --bg-secondary: #111111;
+  --bg-card: #161616;
+  --bg-hover: #1c1c1c;
+  --border-subtle: #1f1f1f;
+  --text-primary: #f5f5f5;
+  --text-secondary: #a1a1a1;
+  --text-muted: #525252;
+  --accent-blue: #3b82f6;
+  --accent-green: #22c55e;
+  --accent-red: #ef4444;
+  --accent-amber: #f59e0b;
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);
@@ -127,4 +151,23 @@
   html {
     @apply font-sans;
   }
+}
+
+@keyframes videoCardEnter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.video-card-enter {
+  opacity: 0;
+  animation-name: videoCardEnter;
+  animation-duration: 300ms;
+  animation-timing-function: ease-out;
+  animation-fill-mode: forwards;
 }
