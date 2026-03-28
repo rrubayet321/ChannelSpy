@@ -50,7 +50,7 @@ export function Header() {
           </div>
         </details>
         <a
-          href="https://github.com"
+          href="https://github.com/rrubayet321/ChannelSpy"
           target="_blank"
           rel="noopener noreferrer"
           className="hidden text-xs text-white/30 transition-colors hover:text-white/60 sm:inline"

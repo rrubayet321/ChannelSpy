@@ -10,6 +10,7 @@ export interface Channel {
   viewCount: number
   publishedAt: string
   uploadsPlaylistId: string
+  verified?: boolean
 }
 
 export interface Video {

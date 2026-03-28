@@ -1,89 +1,79 @@
----
+# ChannelSpy
 
-# ChannelSpy 🕵️
+![Next.js](https://img.shields.io/badge/Next.js-16-000000?logo=nextdotjs&logoColor=white)
+![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
+![Tailwind](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?logo=tailwindcss&logoColor=white)
+![Recharts](https://img.shields.io/badge/Recharts-3-22C55E)
+![YouTube](https://img.shields.io/badge/API-YouTube_Data_v3-FF0000?logo=youtube&logoColor=white)
+![Tests](https://img.shields.io/badge/Tests-11%20passing-brightgreen)
+![License](https://img.shields.io/badge/License-MIT-lightgrey)
 
-> YouTube competitor intelligence. Paste a channel URL. Get instant analytics.
+> You have ten competitor tabs open and a spreadsheet that is already wrong.
 
-[![Next.js](https://img.shields.io/badge/Next.js-16-000000?style=flat-square&logo=nextdotjs&logoColor=white)](https://nextjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
-[![Vercel](https://img.shields.io/badge/Vercel-Deployed-000000?style=flat-square&logo=vercel&logoColor=white)](https://channelspy.vercel.app)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
+**ChannelSpy** is a Next.js app that turns any public YouTube channel into a **clean analytics report** in one paste: KPIs, trend charts, sortable video intelligence, plain-language “Quick Read” cards, and a **decision-ready CSV export** — without exposing API keys in the browser.
 
----
-
-## Overview
-
-**ChannelSpy** turns any public YouTube channel into a focused analytics report: KPIs, trend charts, sortable video intelligence, and plain-language summaries you can share or export. It is built for **enterprise media teams**, **content creators**, and **agencies** who need fast competitor context without juggling spreadsheets or raw API responses.
-
----
-
-## Live Demo
-
-**[channelspy.vercel.app](https://channelspy.vercel.app)**
-
-> Paste a YouTube channel URL like `@MrBeast` or `@mkbhd` to get started.
+Built as a full-stack project to explore **App Router**, **server-only secrets**, **Recharts**, and **quota-conscious** YouTube Data API v3 usage.
 
 ---
 
-## Features
+## Demo
 
-- 🔗 Channel URL parsing (handles, `/channel/`, `/c/`, `/user/`, full URLs)
-- 🎬 Long Videos vs Shorts separation (duration-based, ≤3 minutes = Short)
-- 📈 Performance Score (0–100 proprietary composite per video)
-- 📉 Momentum tracking (recent uploads vs prior window)
-- ⏱️ Consistency score (upload spacing regularity, 0–100)
-- 👀 Views per subscriber (reach efficiency vs audience size)
-- 💡 Quick Read cards (plain-language insights + jump links)
-- 📊 View trend chart (latest 20 uploads)
-- 🤝 Engagement by video chart (likes + comments vs views)
-- 🏆 Recent vs channel baseline chart (winners vs typical performance)
-- 🥇 Top videos by views chart
-- ↕️ Sort by views, engagement, performance score, date, duration
-- 🎛️ Advanced filters (date presets, minimum views)
-- 📤 CSV export
-- 📱 Responsive design
-- 🔒 Secure API proxy (`YOUTUBE_API_KEY` never exposed to the client)
+**Live:** [channelspy.vercel.app](https://channelspy.vercel.app)
 
----
-
-## Tech Stack
-
-| Category        | Technology                                                                 |
-| --------------- | -------------------------------------------------------------------------- |
-| Framework       | [Next.js](https://nextjs.org/) 16 (App Router)                             |
-| Language        | [TypeScript](https://www.typescriptlang.org/)                              |
-| Styling         | [Tailwind CSS](https://tailwindcss.com/) v4                                |
-| Charts          | [Recharts](https://recharts.org/)                                          |
-| API             | Next.js Route Handler → [YouTube Data API v3](https://developers.google.com/youtube/v3) |
-| Deployment      | [Vercel](https://vercel.com/)                                              |
-| Font            | [Inter](https://fonts.google.com/specimen/Inter) + [JetBrains Mono](https://www.jetbrains.com/lp/mono/) via `next/font` |
-| UI Components   | [shadcn/ui](https://ui.shadcn.com/) patterns, [Lucide React](https://lucide.dev/) icons |
+```
+User pastes @handle, /channel/ID, or full YouTube URL
+           ↓
+  Next.js route handler fetches channel + uploads playlist + video stats
+           ↓
+  Client merges data: Long vs Shorts buckets, scores, momentum, consistency
+           ↓
+  Dashboard: Quick Read → KPIs → charts → filterable video grid → Export CSV
+```
 
 ---
 
 ## Architecture
 
-### Data Flow
-
+```mermaid
+flowchart LR
+    user([User]) -->|paste URL| ui[Next.js App]
+    ui -->|GET /api/youtube| route[Route Handler]
+    route -->|channels playlistItems videos| yt[YouTube Data API v3]
+    yt -->|JSON| route
+    route -->|sanitized JSON| ui
+    ui -->|useChannelData + utils| metrics[Scores & buckets]
+    metrics -->|Recharts + grid| viz[Charts & tables]
 ```
-User Input
-    → parseChannelUrl (client, lib/utils)
-    → GET /api/youtube?action=channel | videos | stats
-    → YouTube Data API v3 (server-side only)
-    → useChannelData hook (fetch, merge, cache)
-    → Analytics engine (utils + hook: scores, momentum, consistency)
-    → UI components (KPIs, charts, Quick Read, video grid, export)
-```
 
-For a deeper breakdown of routes, actions, and metric code paths, see **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)**.
+---
 
-### Key Design Decisions
+## Tech Stack
 
-1. **Playlist items over search** — The app walks the channel **uploads playlist** (`playlistItems` + batched `videos` statistics) instead of `search.list`. That yields a stable, channel-owned video list with **lower quota cost** per deep analysis than repeatedly searching.
-2. **Long / Shorts split** — Shorts and long-form behave differently in algorithm, length, and audience expectation. **Separate buckets** keep averages, momentum, and charts meaningful instead of blending incompatible formats.
-3. **Server-side API proxy** — All YouTube calls run in **`src/app/api/youtube/route.ts`**. The browser never sees `YOUTUBE_API_KEY`, reducing leak risk and keeping keys compatible with server-only rotation.
-4. **Performance Score** — Each video gets a **0–100 score**: views vs channel average (capped, up to 40 pts), engagement vs channel average (capped, up to 35 pts), plus a **recency bonus** (up to 25 pts for uploads in the last 7–90 days). The result highlights “strong right now” uploads, not just all-time giants.
+| Layer | Technology | Why |
+| --- | --- | --- |
+| Framework | **Next.js 16** (App Router) | SSR-friendly app + API routes in one repo |
+| UI | **React 19**, **Tailwind CSS v4** | Fast iteration, dark SaaS layout |
+| Charts | **Recharts** | Composable charts for trends and comparisons |
+| Data | **YouTube Data API v3** | Official channel, playlist, and video statistics |
+| Quality | **Vitest**, **ESLint** | Fast unit tests for core `lib/utils` without a browser |
+| Styling tokens | **shadcn/tailwind.css** | Consistent design variables |
+
+---
+
+## Technical Highlights
+
+**Server-side API proxy** — `YOUTUBE_API_KEY` is read only in `src/app/api/youtube/route.ts`. The client calls same-origin `/api/youtube`; the key never ships to the browser.
+
+**Playlist-first ingestion** — The app walks the channel **uploads playlist** (`playlistItems` + batched `videos`) instead of abusing `search.list`, keeping quota use predictable for deep reports.
+
+**Long vs Shorts split** — Videos are classified by duration (≤3 minutes = Short). Averages, momentum, and charts stay meaningful instead of blending incompatible formats.
+
+**Performance score (0–100)** — Per video: **views vs channel average** (capped at 3×, up to **55** pts) plus **engagement vs channel average** (capped at 3×, up to **45** pts). Top performers land in a **70–90+** range on healthy channels.
+
+**CSV export** — UTF-8 BOM for Excel, a short metadata block, then rows sorted by score with human column names (`Views`, `Performance Tier`, `Views vs Channel Avg %`, etc.).
+
+**Structured errors** — API returns typed error codes (`NOT_FOUND`, `QUOTA_EXCEEDED`, `INVALID_INPUT`, …) so the UI can show specific recovery copy.
 
 ---
 
@@ -92,103 +82,76 @@ For a deeper breakdown of routes, actions, and metric code paths, see **[docs/AR
 ### Prerequisites
 
 - **Node.js** 18+
-- **YouTube Data API v3** key ([Google Cloud Console](https://console.cloud.google.com/))
+- [Google Cloud](https://console.cloud.google.com/) project with **YouTube Data API v3** enabled
 
-### Installation
+### Install & run
 
-1. **Clone the repository**
+```bash
+git clone https://github.com/rrubayet321/ChannelSpy.git
+cd ChannelSpy
+npm install
+```
 
-   ```bash
-   git clone https://github.com/rrubayet321/ChannelSpy.git
-   cd ChannelSpy
-   ```
+Create `.env.local` (never commit it):
 
-2. **Install dependencies**
+```bash
+YOUTUBE_API_KEY=your_youtube_data_api_v3_key
+```
 
-   ```bash
-   npm install
-   ```
+```bash
+npm run dev
+# → http://localhost:3000
+```
 
-3. **Create environment file**
+### Scripts
 
-   ```bash
-   touch .env.local
-   ```
-
-4. **Add your API key** to `.env.local`:
-
-   ```bash
-   YOUTUBE_API_KEY=your_youtube_data_api_v3_key
-   ```
-
-5. **Run the development server**
-
-   ```bash
-   npm run dev
-   ```
-
-   Open [http://localhost:3000](http://localhost:3000).
-
-### Environment Variables
-
-| Variable           | Required | Description |
-| ------------------ | -------- | ----------- |
-| `YOUTUBE_API_KEY`  | **Yes**  | YouTube Data API v3 key from Google Cloud Console (enabled for YouTube Data API v3, restricted appropriately). |
+| Command | Description |
+| --- | --- |
+| `npm run dev` | Development server |
+| `npm run build` | Production build |
+| `npm run start` | Run production server |
+| `npm run lint` | ESLint |
+| `npm run test` | Vitest (`src/**/*.test.ts`) |
 
 ---
 
-## Usage
+## API Reference
 
-The analyzer accepts common channel formats, for example:
+Single route: **`GET /api/youtube`** — all actions via query parameters.
 
-- `@MrBeast`
-- `https://www.youtube.com/@mkbhd`
-- `https://www.youtube.com/channel/UCxxxxxx`
+| `action` | Required params | Description |
+| --- | --- | --- |
+| `channel` | `handle` **or** `channelId` | Resolve channel metadata + uploads playlist id |
+| `videos` | `playlistId` | Page through playlist items (optional `pageToken`, `maxResults`) |
+| `stats` | `ids` (comma-separated video ids, max 50) | Snippet + statistics + contentDetails per video |
 
-Paste into the search field and run **Analyze** to open the report.
-
----
-
-## Analytics Explained
-
-- **Performance Score (0–100)** — Composite signal: how **views** and **engagement** compare to this channel’s own averages (each capped at 3× average for scoring), plus a **recency** boost for newer uploads. Capped between 0 and 100.
-- **Momentum** — Compares average views of the **5 most recent** uploads to the **next 5** older uploads (requires enough history). Positive % means recent videos are outperforming the prior batch on views.
-- **Consistency score (0–100)** — Measures **regularity of gaps** between publish dates (coefficient-of-variation style). **99/100** means upload spacing is very steady vs the channel’s typical gap; lower scores mean erratic schedules.
-- **Views per subscriber** — `(average views per video in tab) / subscriber count`, shown as a percentage of subscribers reached per upload. Useful for **reach efficiency**, especially across channel sizes.
-- **Engagement rate** — `(likeCount + commentCount) / viewCount × 100`, expressed as a percentage. Reflects **audience reaction density** per view.
+**Errors** — JSON body `{ error: { code, message } }` with appropriate HTTP status (400 / 404 / 429 / 500 / 502).
 
 ---
 
-## Roadmap
+## Tests
 
-### What I'd build next:
+Unit tests mock **nothing** for YouTube — they target **pure helpers** (`parseChannelUrl`, `formatViews`, `calcPerformanceScore`, …) so CI stays fast and credential-free.
 
-- Channel vs channel comparison
-- Historical snapshot tracking
-- Weekly email digest reports
-- Redis caching layer
-- Shareable report URLs
-- Multi-channel watchlist
+```bash
+npm run test
+# 11 tests, sub-second
+```
 
 ---
 
-## Contributing
+## Known Limitations
 
-Contributions are welcome. Fork the repository, create a branch for your change, and open a pull request with a clear description of the problem and solution. Please run `npm run lint` and `npx tsc --noEmit` before submitting.
+- Fetches are capped (e.g. **200** recent uploads per analysis) to stay within reasonable quota and latency.
+- **Momentum** and **consistency** need enough published videos; small channels may show `0` or `~N/A` where data is insufficient.
+- Thumbnails rely on YouTube/Google CDNs; `next.config.ts` `images.remotePatterns` must include hosts your deployment uses.
 
 ---
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+[MIT](LICENSE)
 
 ---
 
-## Author
-
-Built by **Rubayet Hassan**
-
-- GitHub: [@rrubayet321](https://github.com/rrubayet321)
-- Built for the **VidMetrics Vibe Coder** challenge
-
----
+Built by **[Rubayet Hassan](https://github.com/rrubayet321)** · [ChannelSpy on GitHub](https://github.com/rrubayet321/ChannelSpy)

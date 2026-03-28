@@ -76,29 +76,17 @@ export function calcEngagementRate(
 }
 
 export function calcPerformanceScore(
-  video: Pick<Video, "viewCount" | "engagementRate" | "publishedAt">,
+  video: Pick<Video, "viewCount" | "engagementRate">,
   channelAvgViews: number,
   channelAvgEngagement: number,
 ): number {
   const safeAvgViews = channelAvgViews > 0 ? channelAvgViews : 1
   const safeAvgEngagement = channelAvgEngagement > 0 ? channelAvgEngagement : 1
 
-  const viewScore = (Math.min(video.viewCount / safeAvgViews, 3) / 3) * 40
-  const engScore =
-    (Math.min(video.engagementRate / safeAvgEngagement, 3) / 3) * 35
+  const viewScore = (Math.min(video.viewCount / safeAvgViews, 3) / 3) * 55
+  const engScore = (Math.min(video.engagementRate / safeAvgEngagement, 3) / 3) * 45
 
-  const publishedDate = parseISO(video.publishedAt)
-  const daysSincePublish = Number.isNaN(publishedDate.getTime())
-    ? Number.POSITIVE_INFINITY
-    : Math.max(
-        0,
-        Math.floor((Date.now() - publishedDate.getTime()) / (1000 * 60 * 60 * 24)),
-      )
-
-  const recencyScore =
-    daysSincePublish <= 7 ? 25 : daysSincePublish <= 30 ? 15 : daysSincePublish <= 90 ? 8 : 0
-
-  const total = Math.round(viewScore + engScore + recencyScore)
+  const total = Math.round(viewScore + engScore)
   return Math.min(100, Math.max(0, total))
 }
 

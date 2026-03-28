@@ -66,33 +66,15 @@ describe("calcTrendDelta", () => {
 })
 
 describe("calcPerformanceScore", () => {
-  const recent = new Date().toISOString()
-
   it("scores in 0–100 range", () => {
-    const score = calcPerformanceScore(
-      {
-        viewCount: 200,
-        engagementRate: 4,
-        publishedAt: recent,
-      },
-      100,
-      2,
-    )
+    const score = calcPerformanceScore({ viewCount: 200, engagementRate: 4 }, 100, 2)
     expect(score).toBeGreaterThanOrEqual(0)
     expect(score).toBeLessThanOrEqual(100)
   })
 
   it("rewards above-average views and engagement", () => {
-    const low = calcPerformanceScore(
-      { viewCount: 50, engagementRate: 1, publishedAt: recent },
-      100,
-      2,
-    )
-    const high = calcPerformanceScore(
-      { viewCount: 300, engagementRate: 6, publishedAt: recent },
-      100,
-      2,
-    )
+    const low = calcPerformanceScore({ viewCount: 50, engagementRate: 1 }, 100, 2)
+    const high = calcPerformanceScore({ viewCount: 300, engagementRate: 6 }, 100, 2)
     expect(high).toBeGreaterThan(low)
   })
 })

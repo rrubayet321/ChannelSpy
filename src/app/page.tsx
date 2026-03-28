@@ -31,7 +31,7 @@ export default function Home() {
   const { data, error, errorCode, isLoading, analyzeChannel, clear } = useChannelData()
   const [reportMode, setReportMode] = useState(false)
   const [activeTab, setActiveTab] = useState<"long" | "shorts">("long")
-  const [showDetailedSections, setShowDetailedSections] = useState(false)
+  const [showDetailedSections, setShowDetailedSections] = useState(true)
   const [channelInput, setChannelInput] = useState("")
   const [showIntro, setShowIntro] = useState(true)
   const exampleHandles = ["@MrBeast", "@mkbhd", "@chriswillx"] as const
@@ -52,7 +52,7 @@ export default function Home() {
 
   const handleAnalyze = async (input: string) => {
     setReportMode(true)
-    setShowDetailedSections(false)
+    setShowDetailedSections(true)
     const analytics = await analyzeChannel(input)
     if (!analytics) return
     if (analytics.longForm.videos.length === 0 && analytics.shorts.videos.length > 0) {
