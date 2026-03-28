@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
+import { ViewsMetricTooltip } from "@/components/charts/chartTooltip"
 import type { Video } from "@/lib/types"
 import { formatViews } from "@/lib/utils"
 
@@ -131,6 +132,7 @@ export function TopVideosChart({ videos }: TopVideosChartProps) {
     .slice(0, 10)
     .map((v) => ({
       name: v.title,
+      fullTitle: v.title,
       views: v.viewCount,
     }))
 
@@ -181,20 +183,7 @@ export function TopVideosChart({ videos }: TopVideosChartProps) {
             width={yAxisWidth}
             interval={0}
           />
-          <Tooltip
-            contentStyle={{
-              background: "#18181b",
-              border: "1px solid rgba(99,102,241,0.3)",
-              borderRadius: 10,
-              fontSize: 12,
-              color: "#f5f5f5",
-              padding: "8px 12px",
-              fontFamily: "inherit",
-            }}
-            formatter={(value) => [formatViews(Number(value ?? 0)), "Views"]}
-            labelFormatter={(label) => String(label ?? "")}
-            cursor={{ fill: "rgba(99,102,241,0.06)" }}
-          />
+          <Tooltip content={ViewsMetricTooltip} cursor={{ fill: "rgba(99,102,241,0.06)" }} />
           <Bar dataKey="views" radius={[0, 4, 4, 0]}>
             {data.map((_entry, index) => (
               <Cell

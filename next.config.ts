@@ -5,7 +5,8 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       { protocol: "https", hostname: "i.ytimg.com" },
       { protocol: "https", hostname: "i9.ytimg.com" },
-      /* YouTube channel avatars and video thumbs use many Google CDNs */
+      { protocol: "https", hostname: "yt3.ggpht.com" },
+      { protocol: "https", hostname: "yt3.googleusercontent.com" },
       { protocol: "https", hostname: "**.ggpht.com" },
       { protocol: "https", hostname: "**.googleusercontent.com" },
     ],

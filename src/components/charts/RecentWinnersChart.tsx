@@ -11,6 +11,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts"
+import { ViewsMetricTooltip } from "@/components/charts/chartTooltip"
 import type { Video } from "@/lib/types"
 import { formatViews } from "@/lib/utils"
 
@@ -27,6 +28,7 @@ export function RecentWinnersChart({ videos, baselineViews }: RecentWinnersChart
     .reverse()
     .map((v) => ({
       name: v.title.length > 22 ? v.title.slice(0, 22) + "…" : v.title,
+      fullTitle: v.title,
       views: v.viewCount,
       aboveBaseline: v.viewCount >= baselineViews,
     }))
@@ -46,20 +48,7 @@ export function RecentWinnersChart({ videos, baselineViews }: RecentWinnersChart
             axisLine={false}
             tickLine={false}
           />
-          <Tooltip
-            contentStyle={{
-              background: "#18181b",
-              border: "1px solid rgba(99,102,241,0.3)",
-              borderRadius: 10,
-              fontSize: 12,
-              color: "#f5f5f5",
-              padding: "8px 12px",
-              fontFamily: "inherit",
-            }}
-            formatter={(value) => [formatViews(Number(value ?? 0)), "Views"]}
-            labelFormatter={(label) => String(label ?? "")}
-            cursor={{ fill: "rgba(99,102,241,0.08)" }}
-          />
+          <Tooltip content={ViewsMetricTooltip} cursor={{ fill: "rgba(99,102,241,0.08)" }} />
           <ReferenceLine
             y={baselineViews}
             stroke="rgba(255,255,255,0.3)"

@@ -1,6 +1,7 @@
 "use client"
 
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
+import { EngagementMetricTooltip } from "@/components/charts/chartTooltip"
 import type { Video } from "@/lib/types"
 
 type EngagementChartProps = {
@@ -14,6 +15,7 @@ export function EngagementChart({ videos }: EngagementChartProps) {
     .slice(-20)
     .map((v) => ({
       name: v.title.length > 22 ? v.title.slice(0, 22) + "…" : v.title,
+      fullTitle: v.title,
       engagement: parseFloat(v.engagementRate.toFixed(2)),
     }))
 
@@ -38,20 +40,7 @@ export function EngagementChart({ videos }: EngagementChartProps) {
             axisLine={false}
             tickLine={false}
           />
-          <Tooltip
-            contentStyle={{
-              background: "#18181b",
-              border: "1px solid rgba(99,102,241,0.3)",
-              borderRadius: 10,
-              fontSize: 12,
-              color: "#f5f5f5",
-              padding: "8px 12px",
-              fontFamily: "inherit",
-            }}
-            formatter={(value) => [`${Number(value ?? 0).toFixed(2)}%`, "Engagement"]}
-            labelFormatter={(label) => String(label ?? "")}
-            cursor={{ fill: "rgba(99,102,241,0.08)" }}
-          />
+          <Tooltip content={EngagementMetricTooltip} cursor={{ fill: "rgba(99,102,241,0.08)" }} />
           <Bar dataKey="engagement" fill="url(#barGradient)" radius={[4, 4, 0, 0]} maxBarSize={28} />
         </BarChart>
       </ResponsiveContainer>

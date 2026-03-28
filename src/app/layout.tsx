@@ -19,12 +19,12 @@ const monoFont = JetBrains_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL("https://channelspy.app"),
   title: {
-    default: "ChannelSpy",
+    default: "ChannelSpy — YouTube Competitor Intelligence",
     template: "%s | ChannelSpy",
   },
   applicationName: "ChannelSpy",
   description:
-    "Modern YouTube competitor intelligence for creators and teams. Analyze performance, trends, and content velocity instantly.",
+    "Analyze any YouTube channel instantly. Views, engagement, trends, and performance scores.",
   keywords: [
     "YouTube analytics",
     "channel analytics",
@@ -40,17 +40,17 @@ export const metadata: Metadata = {
     apple: "/favicon.svg",
   },
   openGraph: {
-    title: "ChannelSpy",
+    title: "ChannelSpy — YouTube Competitor Intelligence",
     description:
-      "Modern YouTube competitor intelligence for creators and teams. Analyze performance, trends, and content velocity instantly.",
+      "Analyze any YouTube channel instantly. Views, engagement, trends, and performance scores.",
     type: "website",
     images: ["/brandmark.svg"],
   },
   twitter: {
     card: "summary",
-    title: "ChannelSpy",
+    title: "ChannelSpy — YouTube Competitor Intelligence",
     description:
-      "Modern YouTube competitor intelligence for creators and teams. Analyze performance, trends, and content velocity instantly.",
+      "Analyze any YouTube channel instantly. Views, engagement, trends, and performance scores.",
     images: ["/brandmark.svg"],
   },
 };

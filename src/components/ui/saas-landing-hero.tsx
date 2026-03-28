@@ -28,7 +28,7 @@ export function SaasLandingHero({ onGetStarted, className }: SaasLandingHeroProp
         className="pointer-events-none absolute inset-0 z-0 overflow-hidden"
       >
         <div
-          className="gradient-stripe-group absolute"
+          className="gradient-stripe-group absolute opacity-[0.03]"
           style={{
             right: "-22%",
             bottom: "-62%",

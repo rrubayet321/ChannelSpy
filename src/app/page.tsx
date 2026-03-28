@@ -18,7 +18,6 @@ import { useChannelData } from "@/hooks/useChannelData"
 import { buildGuidedInsightCards, type SummaryCardAction } from "@/lib/insights"
 import { exportToCSV, formatViews } from "@/lib/utils"
 import { AlertTriangle, ArrowLeft, Download, SearchX, ShieldAlert } from "lucide-react"
-import { ChartColorsGuide } from "@/components/analytics/ChartColorsGuide"
 import { LandingAttribution } from "@/components/landing/LandingAttribution"
 
 const KPI_ACCENTS = [
@@ -184,7 +183,7 @@ export default function Home() {
 
             {reportMode && (
               <section className="space-y-10">
-            <section className="sticky top-14 z-20 min-w-0 rounded-2xl border border-white/6 bg-black/90 p-3 shadow-[0_4px_24px_rgba(0,0,0,0.5)] backdrop-blur-xl sm:p-4">
+            <section className="sticky top-14 z-20 min-w-0 rounded-2xl border border-white/6 bg-[#080808]/90 p-3 shadow-[0_4px_24px_rgba(0,0,0,0.5)] backdrop-blur-md sm:p-4">
               <div className="flex min-w-0 flex-col gap-3">
                 <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div className="flex items-center gap-2">
@@ -344,7 +343,6 @@ export default function Home() {
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex flex-wrap items-center gap-2">
                   <h2 className="font-heading text-base font-semibold tracking-tight text-white">Trends</h2>
-                  <ChartColorsGuide />
                 </div>
                 <span className="text-xs text-zinc-500">{activeTab === "long" ? "Long videos" : "Shorts"}</span>
               </div>
