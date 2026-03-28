@@ -41,7 +41,7 @@ export function VideoCard({ video, channelAvgViews, index }: VideoCardProps) {
       {/* Thumbnail */}
       <div className="relative aspect-video w-full overflow-hidden">
         <Image
-          src={video.thumbnailUrl || "/vercel.svg"}
+          src={video.thumbnailUrl || "/brandmark.svg"}
           alt={video.title}
           fill
           unoptimized

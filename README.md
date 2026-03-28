@@ -115,6 +115,7 @@ npm run dev     # start local dev server
 npm run build   # production build
 npm run start   # run production server
 npm run lint    # eslint checks
+npm run test    # vitest unit tests (lib/utils)
 ```
 
 ---
