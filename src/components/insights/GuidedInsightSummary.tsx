@@ -1,7 +1,6 @@
 "use client"
 
 import { Activity, Lightbulb, TrendingUp } from "lucide-react"
-
 import type { GuidedInsightCard } from "@/lib/insights"
 
 type GuidedInsightSummaryProps = {
@@ -10,35 +9,35 @@ type GuidedInsightSummaryProps = {
 }
 
 export function GuidedInsightSummary({ cards, onAction }: GuidedInsightSummaryProps) {
-  const iconByCardId: Record<GuidedInsightCard["id"], { icon: typeof TrendingUp; colorClass: string }> = {
-    working: { icon: TrendingUp, colorClass: "text-[#4f8ef7]" },
-    failing: { icon: Activity, colorClass: "text-[#f5a623]" },
-    next: { icon: Lightbulb, colorClass: "text-[#3ecf8e]" },
+  const iconByCardId: Record<
+    GuidedInsightCard["id"],
+    { icon: typeof TrendingUp; iconClass: string; borderClass: string }
+  > = {
+    working: { icon: TrendingUp, iconClass: "text-[#6366f1]", borderClass: "border-[#6366f1]/20" },
+    failing: { icon: Activity, iconClass: "text-[#818cf8]", borderClass: "border-[#818cf8]/20" },
+    next: { icon: Lightbulb, iconClass: "text-[#a5b4fc]", borderClass: "border-[#a5b4fc]/20" },
   }
 
   return (
-    <section className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="font-heading text-lg font-semibold tracking-tight text-white">Quick Read</h2>
-        <p className="text-xs text-[#6d7688]">Three answers for fast decision making</p>
-      </div>
+    <section className="space-y-3">
+      <h2 className="font-heading text-base font-semibold tracking-tight text-white">Quick Read</h2>
 
-      <div className="grid gap-4 xl:grid-cols-3">
+      <div className="grid gap-3 xl:grid-cols-3">
         {cards.map((card) => {
-          const { icon: Icon, colorClass } = iconByCardId[card.id]
+          const { icon: Icon, iconClass, borderClass } = iconByCardId[card.id]
 
           return (
             <article
               key={card.id}
-              className="rounded-2xl border border-[#222833] bg-[#0f131a] p-5 transition-colors hover:border-[#334056]"
+              className={`rounded-2xl border ${borderClass} bg-[#09090b] p-5 shadow-[0_0_20px_rgba(99,102,241,0.04)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#18181b] hover:shadow-[0_0_24px_rgba(99,102,241,0.1)]`}
             >
-              <Icon className={`mb-3 h-4 w-4 ${colorClass}`} />
-              <p className="text-[10px] uppercase tracking-[0.14em] text-[#7a8498]">{card.title}</p>
-              <p className="mt-2 min-h-[64px] text-sm leading-relaxed text-[#c0c8d8]">{card.summary}</p>
+              <Icon className={`mb-3 h-3.5 w-3.5 ${iconClass}`} />
+              <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-zinc-400">{card.title}</p>
+              <p className="mt-2 min-h-[56px] text-sm leading-relaxed text-zinc-300">{card.summary}</p>
               <button
                 type="button"
                 onClick={() => onAction(card.action)}
-                className="mt-3 inline-flex items-center rounded-lg border border-[#2e3442] bg-[#121722] px-3 py-1.5 text-xs text-[#d7dbe6] transition-colors hover:border-[#4c5872] hover:text-white"
+                className="mt-3 inline-flex items-center rounded-lg border border-indigo-500/20 bg-indigo-500/10 px-3 py-1.5 text-xs font-medium text-indigo-300 transition-colors hover:bg-indigo-500/15"
               >
                 {card.ctaLabel}
               </button>

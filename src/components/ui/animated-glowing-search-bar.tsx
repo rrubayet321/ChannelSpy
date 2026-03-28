@@ -28,7 +28,7 @@ export function AnimatedGlowingSearchBar({
   return (
     <div className={cn("relative flex w-full max-w-lg items-center justify-center sm:max-w-xl", wrapperClassName)}>
       <div className="group relative flex min-h-[48px] w-full items-center justify-center" id="channel-search-glow">
-        {/* Outer glow layers — conic gradients tuned to app theme (#4f8ef7, #3ecf8e, neutrals) */}
+        {/* Outer glow layers */}
         <div
           className="absolute z-0 h-full w-full max-h-[58px] overflow-hidden rounded-xl blur-[2.5px]
             before:absolute before:top-1/2 before:left-1/2 before:z-[-2] before:h-[999px] before:w-[999px] before:-translate-x-1/2 before:-translate-y-1/2 before:rotate-60 before:bg-[conic-gradient(#000,#1e3a5f_5%,#000_38%,#000_50%,#2d6b4f_60%,#000_87%)] before:bg-no-repeat before:transition-all before:duration-[2000ms]
@@ -61,13 +61,13 @@ export function AnimatedGlowingSearchBar({
             placeholder={placeholder}
             autoComplete="off"
             className={cn(
-              "h-12 w-full min-w-0 rounded-lg border border-[#252a34] bg-[#11141a] pr-11 pl-11 text-sm text-white caret-[#6bb0ff] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)] outline-none transition-[box-shadow,border-color] placeholder:font-normal placeholder:text-[#98a2b3] focus:border-[#3b4e73] focus:ring-2 focus:ring-[#4f8ef7]/30 disabled:opacity-50",
+              "h-12 w-full min-w-0 rounded-lg border border-[#2e3a59] bg-[#11182b] pr-11 pl-11 text-sm text-[#eef3ff] caret-[#8cb2ff] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)] outline-none transition-[box-shadow,border-color] placeholder:font-normal placeholder:text-[#b3bfd8] focus:border-[#546ea6] focus:ring-2 focus:ring-[#6c78ff]/35 disabled:opacity-50",
               className,
             )}
             {...inputProps}
           />
           <div
-            className="pointer-events-none absolute top-2 left-1.5 h-4 w-7 rounded-full bg-[#4f8ef7]/20 opacity-80 blur-xl transition-opacity duration-2000 group-hover:opacity-0"
+            className="pointer-events-none absolute top-2 left-1.5 h-4 w-7 rounded-full bg-[#6c78ff]/20 opacity-80 blur-xl transition-opacity duration-2000 group-hover:opacity-0"
             aria-hidden
           />
 
@@ -77,11 +77,11 @@ export function AnimatedGlowingSearchBar({
             aria-hidden
           />
 
-          <div className="absolute top-2 right-2 z-[2] flex h-8 w-8 items-center justify-center overflow-hidden rounded-md border border-[#2c3648] bg-gradient-to-b from-[#1a1d25] via-[#0c0f14] to-[#151a22] [isolation:isolate]">
-            <Filter className="h-4 w-4 text-[#acb9d1]" strokeWidth={1.3} aria-hidden />
+          <div className="absolute top-2 right-2 z-[2] flex h-8 w-8 items-center justify-center overflow-hidden rounded-md border border-[#354567] bg-gradient-to-b from-[#1a2338] via-[#0e1424] to-[#1a2238] [isolation:isolate]">
+            <Filter className="h-4 w-4 text-[#d5ddf1]" strokeWidth={1.3} aria-hidden />
           </div>
 
-          <div className="pointer-events-none absolute top-[13px] left-3.5 text-[#aeb7c8]">
+          <div className="pointer-events-none absolute top-[13px] left-3.5 text-[#d0daef]">
             <Search className="h-5 w-5" strokeWidth={2} aria-hidden />
           </div>
         </div>

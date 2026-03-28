@@ -55,7 +55,7 @@ export function SearchInput({
         <button
           type="submit"
           disabled={isLoading || inputValue.trim().length === 0}
-          className="flex h-12 shrink-0 min-w-[116px] items-center justify-center gap-2 self-center rounded-xl border border-white/10 bg-white px-5 text-sm font-semibold text-black shadow-[0_8px_20px_rgba(255,255,255,0.08)] transition-colors hover:bg-[#ececec] disabled:opacity-50"
+          className="analyze-cta-glow flex h-12 shrink-0 min-w-[120px] items-center justify-center gap-2 self-center rounded-xl border border-[#7c88ff] bg-[#6c78ff] px-5 text-sm font-semibold text-white transition-[background-color,transform,filter] hover:bg-[#7a86ff] hover:brightness-105 active:scale-[0.98] disabled:opacity-50"
         >
           {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
           {isLoading ? "Scanning..." : "Analyze"}

@@ -102,9 +102,6 @@ async function handleChannelAction(params: URLSearchParams, apiKey: string) {
   const brandingSettings = asRecord(item?.brandingSettings)
   const image = asRecord(brandingSettings?.image)
   const thumbnails = asRecord(snippet?.thumbnails)
-  const highThumb = asRecord(thumbnails?.high)
-  const mediumThumb = asRecord(thumbnails?.medium)
-  const defaultThumb = asRecord(thumbnails?.default)
   const status = asRecord(item?.status)
   const relatedPlaylists = asRecord(contentDetails?.relatedPlaylists)
 
@@ -114,7 +111,7 @@ async function handleChannelAction(params: URLSearchParams, apiKey: string) {
       title: asString(snippet?.title),
       handle: asString(snippet?.customUrl).replace(/^@/, ""),
       description: asString(snippet?.description),
-      thumbnailUrl: asString(highThumb?.url) || asString(mediumThumb?.url) || asString(defaultThumb?.url),
+      thumbnailUrl: pickBestThumbnailUrl(thumbnails),
       bannerUrl: asOptionalString(image?.bannerExternalUrl),
       subscriberCount: safeNumber(statistics?.subscriberCount),
       videoCount: safeNumber(statistics?.videoCount),
@@ -168,14 +165,11 @@ async function handleVideosAction(params: URLSearchParams, apiKey: string) {
       const contentDetails = asRecord(item.contentDetails)
       const snippet = asRecord(item.snippet)
       const thumbnails = asRecord(snippet?.thumbnails)
-      const highThumb = asRecord(thumbnails?.high)
-      const mediumThumb = asRecord(thumbnails?.medium)
-      const defaultThumb = asRecord(thumbnails?.default)
       const videoId = asString(contentDetails?.videoId)
       return {
         id: videoId,
         title: asString(snippet?.title),
-        thumbnailUrl: asString(highThumb?.url) || asString(mediumThumb?.url) || asString(defaultThumb?.url),
+        thumbnailUrl: pickBestThumbnailUrl(thumbnails),
         publishedAt: asString(contentDetails?.videoPublishedAt) || asString(snippet?.publishedAt),
         channelId: asString(snippet?.channelId),
       }
@@ -231,15 +225,12 @@ async function handleStatsAction(params: URLSearchParams, apiKey: string) {
     const statistics = asRecord(item.statistics)
     const contentDetails = asRecord(item.contentDetails)
     const thumbnails = asRecord(snippet?.thumbnails)
-    const highThumb = asRecord(thumbnails?.high)
-    const mediumThumb = asRecord(thumbnails?.medium)
-    const defaultThumb = asRecord(thumbnails?.default)
 
     return {
       id: asString(item.id),
       title: asString(snippet?.title),
       publishedAt: asString(snippet?.publishedAt),
-      thumbnailUrl: asString(highThumb?.url) || asString(mediumThumb?.url) || asString(defaultThumb?.url),
+      thumbnailUrl: pickBestThumbnailUrl(thumbnails),
       duration: asString(contentDetails?.duration) || "PT0S",
       viewCount: safeNumber(statistics?.viewCount),
       likeCount: safeNumber(statistics?.likeCount),
@@ -334,6 +325,26 @@ function asRecord(value: unknown): Record<string, unknown> | null {
 
 function asString(value: unknown): string {
   return typeof value === "string" ? value : ""
+}
+
+/** Protocol-relative URLs from the API must be absolute for browsers. */
+function normalizeThumbnailUrl(url: unknown): string {
+  if (typeof url !== "string") return ""
+  const t = url.trim()
+  if (!t) return ""
+  return t.startsWith("//") ? `https:${t}` : t
+}
+
+const THUMBNAIL_SIZE_KEYS = ["maxres", "high", "standard", "medium", "default"] as const
+
+function pickBestThumbnailUrl(thumbnails: Record<string, unknown> | null): string {
+  if (!thumbnails) return ""
+  for (const key of THUMBNAIL_SIZE_KEYS) {
+    const entry = asRecord(thumbnails[key])
+    const url = normalizeThumbnailUrl(entry?.url)
+    if (url) return url
+  }
+  return ""
 }
 
 function asOptionalString(value: unknown): string | undefined {

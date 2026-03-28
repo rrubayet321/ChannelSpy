@@ -46,12 +46,12 @@ export function VideoGrid({ videos, channelAvgViews }: VideoGridProps) {
 
   if (videos.length === 0) {
     return (
-      <div className="rounded-2xl border border-[#222833] bg-[#0f131a] p-8 text-center">
-        <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full border border-[#2d3648] bg-[#151b26]">
-          <FileSearch className="h-6 w-6 text-[#555]" />
+      <div className="rounded-2xl border border-[#2f3b59] bg-[#10172a] p-8 text-center">
+        <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full border border-[#36496f] bg-[#1a2440]">
+          <FileSearch className="h-6 w-6 text-[#c8d2ea]" />
         </div>
         <p className="text-sm font-medium text-white">Spy Report is empty.</p>
-        <p className="mt-1 text-xs text-[#555]">
+        <p className="mt-1 text-xs text-[#c1cce6]">
           We found the channel, but no videos were returned to analyze yet.
         </p>
       </div>
@@ -60,21 +60,21 @@ export function VideoGrid({ videos, channelAvgViews }: VideoGridProps) {
 
   return (
     <section className="space-y-5">
-      <p className="text-left text-xs uppercase tracking-[0.14em] text-[#6f788c]">
+      <p className="text-left text-xs uppercase tracking-[0.14em] text-[#c4d0ea]">
         Showing {filteredAndSortedVideos.length} of {videos.length}
       </p>
 
-      <div className="space-y-3 rounded-2xl border border-[#222833] bg-[#0f131a] px-4 py-4">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs text-[#818aa0]">
+      <div className="space-y-3 rounded-2xl border border-[#2f3b59] bg-[#10172a] px-4 py-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-xs text-[#d0daf1]">
             Essentials first: sort quickly, then open advanced filters if needed.
           </p>
-          <div className="flex items-center gap-2">
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
             <SortBar value={sortBy} onChange={setSortBy} />
             <button
               type="button"
               onClick={() => setAdvancedOpen((current) => !current)}
-              className="rounded-lg border border-[#2c3340] bg-[#131826] px-3 py-1 text-xs text-[#aeb6c8] transition-colors hover:border-[#4b5671] hover:text-white"
+              className="w-full rounded-lg border border-[#36496f] bg-[#17223c] px-3 py-1.5 text-xs text-[#dbe3f6] transition-colors hover:border-[#5b6d96] hover:text-white sm:w-auto"
             >
               {advancedOpen ? "Hide advanced" : "Advanced filters"}
             </button>
@@ -82,7 +82,7 @@ export function VideoGrid({ videos, channelAvgViews }: VideoGridProps) {
         </div>
 
         {advancedOpen && (
-          <div className="flex flex-col gap-2 border-t border-[#1d2430] pt-3">
+          <div className="flex flex-col gap-2 border-t border-[#2c3956] pt-3">
             <FilterPanel
               preset={preset}
               minViews={minViews}
@@ -96,7 +96,7 @@ export function VideoGrid({ videos, channelAvgViews }: VideoGridProps) {
                   setPreset("all")
                   setMinViews("")
                 }}
-                className="self-start rounded-lg border border-[#2c3340] px-2.5 py-1 text-xs text-[#aeb6c8] transition-colors hover:border-[#4b5671] hover:text-white"
+                className="self-start rounded-lg border border-[#36496f] px-2.5 py-1 text-xs text-[#dbe3f6] transition-colors hover:border-[#5b6d96] hover:text-white"
               >
                 Reset advanced filters
               </button>
@@ -106,12 +106,12 @@ export function VideoGrid({ videos, channelAvgViews }: VideoGridProps) {
       </div>
 
       {filteredAndSortedVideos.length === 0 ? (
-        <div className="rounded-2xl border border-[#222833] bg-[#0f131a] p-8 text-center">
-          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full border border-[#2d3648] bg-[#151b26]">
-            <FileSearch className="h-6 w-6 text-[#555]" />
+        <div className="rounded-2xl border border-[#2f3b59] bg-[#10172a] p-8 text-center">
+          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full border border-[#36496f] bg-[#1a2440]">
+            <FileSearch className="h-6 w-6 text-[#c8d2ea]" />
           </div>
           <p className="text-sm font-medium text-white">No intel matches these filters.</p>
-          <p className="mt-1 text-xs text-[#555]">
+          <p className="mt-1 text-xs text-[#c1cce6]">
             Try widening date range or lowering minimum views.
           </p>
         </div>

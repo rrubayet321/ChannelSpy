@@ -1,4 +1,3 @@
-import Image from "next/image"
 import { useMemo, useState } from "react"
 
 import type { Channel } from "@/lib/types"
@@ -13,29 +12,36 @@ export function ChannelHeader({ channel }: ChannelHeaderProps) {
   const [failedThumbnailUrl, setFailedThumbnailUrl] = useState<string | null>(null)
 
   const initials = useMemo(() => getChannelInitials(channel.title), [channel.title])
-  const shouldShowFallback = !channel.thumbnailUrl || failedThumbnailUrl === channel.thumbnailUrl
+  const avatarSrc = channel.thumbnailUrl?.trim() ?? ""
+  const shouldShowFallback = !avatarSrc || failedThumbnailUrl === avatarSrc
 
   return (
-    <section className="relative overflow-hidden rounded-2xl border border-[#222833] bg-[#0f131a] p-6 sm:p-7">
+    <section className="relative overflow-hidden rounded-2xl border border-white/6 bg-[#0a0a0a] p-6 shadow-[0_0_30px_rgba(99,102,241,0.05)] sm:p-7">
+      {/* Subtle top edge highlight */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-[#1f2633]/55 to-transparent"
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"
       />
 
       <div className="relative mx-auto flex w-full max-w-3xl flex-col items-center gap-4 text-center">
-        <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-full ring-2 ring-[#364359]">
+        {/* Avatar — plain <img> so any YouTube/Google CDN host works; next/image still enforces remotePatterns even when unoptimized */}
+        <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-full ring-1 ring-white/10">
           {shouldShowFallback ? (
-            <div className="flex h-full w-full items-center justify-center bg-[#171d29] text-xl font-semibold text-[#d4ddef]">
+            <div className="flex h-full w-full items-center justify-center bg-white/5 text-xl font-semibold text-white/70">
               {initials}
             </div>
           ) : (
-            <Image
-              src={channel.thumbnailUrl}
-              alt={channel.title}
-              fill
-              unoptimized
-              onError={() => setFailedThumbnailUrl(channel.thumbnailUrl)}
-              className="object-cover transition-transform duration-300 hover:scale-[1.03]"
+            // Channel avatars come from many YouTube/Google hostnames; next/image blocks disallowed hosts even with unoptimized.
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={avatarSrc}
+              alt={`${channel.title} channel picture`}
+              width={160}
+              height={160}
+              decoding="async"
+              referrerPolicy="no-referrer"
+              onError={() => setFailedThumbnailUrl(avatarSrc)}
+              className="h-full w-full object-cover transition-transform duration-300 hover:scale-[1.03]"
             />
           )}
         </div>
@@ -44,7 +50,7 @@ export function ChannelHeader({ channel }: ChannelHeaderProps) {
           <h2 className="truncate font-heading text-3xl font-semibold tracking-tight text-white sm:text-4xl">
             {channel.title}
           </h2>
-          <p className="text-sm text-[#8f9ab1] sm:text-base">{handle}</p>
+          <p className="text-sm text-white/40 sm:text-base">{handle}</p>
           <div className="mt-4 flex flex-wrap items-center justify-center gap-2.5">
             <StatPill label="Subscribers" value={formatViews(channel.subscriberCount)} />
             <StatPill label="Total views" value={formatViews(channel.viewCount)} />
@@ -68,8 +74,8 @@ function getChannelInitials(title: string): string {
 
 function StatPill({ label, value }: { label: string; value: string }) {
   return (
-    <span className="inline-flex items-center gap-2 rounded-lg border border-[#2a3446] bg-[#141b27] px-3.5 py-1.5 text-sm transition-colors hover:border-[#3f4d65] hover:bg-[#182132]">
-      <span className="text-[#8390a8]">{label}</span>
+    <span className="inline-flex items-center gap-2 rounded-lg border border-white/7 bg-white/4 px-3.5 py-1.5 text-sm transition-colors hover:border-white/12 hover:bg-white/6">
+      <span className="text-white/40">{label}</span>
       <span className="font-mono font-semibold text-white">{value}</span>
     </span>
   )

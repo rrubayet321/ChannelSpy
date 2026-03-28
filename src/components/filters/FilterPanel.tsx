@@ -33,8 +33,8 @@ export function FilterPanel({
             onClick={() => onPresetChange(option.value)}
             className={`rounded-full border px-3 py-1 text-xs transition-colors ${
               active
-                ? "border-[#333] bg-[#1e1e1e] text-white"
-                : "border-[#1e1e1e] text-[#555] hover:text-[#888]"
+                ? "border-white/18 bg-white/8 text-white"
+                : "border-white/7 text-white/45 hover:border-white/14 hover:text-white/70"
             }`}
           >
             {option.label}
@@ -50,7 +50,7 @@ export function FilterPanel({
           value={minViews}
           onChange={(event) => onMinViewsChange(event.target.value)}
           placeholder="Min views"
-          className="w-32 rounded-lg border border-[#1e1e1e] bg-[#0f0f0f] px-3 py-1 text-xs text-[#888] outline-none placeholder:text-[#333] focus:border-[#333]"
+          className="w-32 rounded-lg border border-white/8 bg-[#0d0d0d] px-3 py-1 text-xs text-white/70 outline-none placeholder:text-white/25 focus:border-white/18 focus:text-white"
         />
       </label>
     </div>

@@ -17,7 +17,7 @@ const sortOptions: Array<{ value: SortOption; label: string }> = [
 
 export function SortBar({ value, onChange }: SortBarProps) {
   return (
-    <div className="flex items-center">
+    <div className="flex w-full items-center sm:w-auto">
       <label htmlFor="sort-by" className="sr-only">
         Sort videos
       </label>
@@ -25,7 +25,7 @@ export function SortBar({ value, onChange }: SortBarProps) {
         id="sort-by"
         value={value}
         onChange={(event) => onChange(event.target.value as SortOption)}
-        className="rounded-lg border border-[#1e1e1e] bg-[#0f0f0f] px-3 py-1 text-xs text-[#888] outline-none transition-colors focus:border-[#333]"
+        className="w-full min-w-0 rounded-lg border border-white/8 bg-[#0d0d0d] px-3 py-1.5 text-xs text-white/70 outline-none transition-colors focus:border-white/18 focus:text-white sm:w-auto sm:min-w-[8.5rem]"
       >
         {sortOptions.map((opt) => (
           <option key={opt.value} value={opt.value}>

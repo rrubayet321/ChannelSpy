@@ -1,22 +1,18 @@
-import type { Metadata } from "next";
-import { Geist_Mono, Manrope, Sora } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
-const displayFont = Sora({
-  variable: "--font-display",
+const sansFont = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
-const bodyFont = Manrope({
-  variable: "--font-body",
-  subsets: ["latin"],
-  display: "swap",
-});
-
-const monoFont = Geist_Mono({
+const monoFont = JetBrains_Mono({
   variable: "--font-mono-face",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
@@ -29,9 +25,19 @@ export const metadata: Metadata = {
   applicationName: "ChannelSpy",
   description:
     "Modern YouTube competitor intelligence for creators and teams. Analyze performance, trends, and content velocity instantly.",
+  keywords: [
+    "YouTube analytics",
+    "channel analytics",
+    "competitor research",
+    "creator tools",
+    "ChannelSpy",
+  ],
+  authors: [{ name: "Rubayet Hassan", url: "https://www.linkedin.com/in/rubayet-hassan2" }],
+  creator: "Rubayet Hassan",
   icons: {
     icon: "/favicon.svg",
     shortcut: "/favicon.svg",
+    apple: "/favicon.svg",
   },
   openGraph: {
     title: "ChannelSpy",
@@ -49,6 +55,13 @@ export const metadata: Metadata = {
   },
 };
 
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#000000",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -57,7 +70,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${displayFont.variable} ${bodyFont.variable} ${monoFont.variable} dark h-full`}
+      className={`${sansFont.variable} ${monoFont.variable} dark h-full`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>

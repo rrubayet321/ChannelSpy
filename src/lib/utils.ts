@@ -1,6 +1,6 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
-import { format, formatDistanceToNowStrict, parseISO } from "date-fns"
+import { differenceInCalendarDays, format, formatDistanceToNowStrict, parseISO } from "date-fns"
 
 import type { ParsedChannelInput, Video } from "@/lib/types"
 
@@ -155,49 +155,143 @@ export function parseChannelUrl(input: string): ParsedChannelInput {
   return { type: "username", value: raw.replace(/^@/, "") }
 }
 
-export function exportToCSV(videos: Video[], channelName: string): void {
+export type ExportCsvContext = {
+  /** Channel average views for the active tab (same bucket as export). */
+  channelAvgViews: number
+  /** Channel average engagement % for the active tab. */
+  avgEngagementPercent: number
+}
+
+/**
+ * Exports a decision-friendly CSV: UTF-8 BOM for Excel, summary block, then rows sorted by
+ * performance score (highest first) with clear metrics and tiers.
+ */
+export function exportToCSV(
+  videos: Video[],
+  channelName: string,
+  tab?: "long" | "shorts",
+  context?: ExportCsvContext,
+): void {
   if (typeof window === "undefined" || videos.length === 0) return
 
-  const headers = [
-    "title",
-    "views",
-    "likes",
-    "comments",
-    "engagement rate",
-    "performance score",
-    "trend delta",
-    "published date",
-    "duration",
-    "video type",
-    "YouTube URL",
+  const sorted = [...videos].sort(
+    (a, b) => b.performanceScore - a.performanceScore || b.viewCount - a.viewCount,
+  )
+
+  const tabLabel =
+    tab === "shorts" ? "Shorts" : tab === "long" ? "Long-form videos" : "All formats"
+
+  const metadataRows: [string, string | number][] = [
+    ["Export type", "ChannelSpy channel analytics (summary + video rows)"],
+    ["How to use", guidanceBlurb()],
+    ["Channel", channelName.trim() || "Unknown"],
+    ["Content tab", tabLabel],
+    ["Sort order", "Performance Score (highest first), then Views"],
+    ["Exported at (UTC)", new Date().toISOString()],
+    ["Video rows below", sorted.length],
   ]
 
-  const rows = videos.map((video) => [
-    escapeCsv(video.title),
-    String(video.viewCount),
-    String(video.likeCount),
-    String(video.commentCount),
-    `${video.engagementRate.toFixed(2)}%`,
-    String(video.performanceScore),
-    `${video.trendDelta.toFixed(2)}%`,
-    escapeCsv(formatDate(video.publishedAt)),
-    escapeCsv(formatDuration(video.duration)),
-    video.isShort ? "short" : "long",
-    escapeCsv(`https://www.youtube.com/watch?v=${video.id}`),
-  ])
+  if (context != null && Number.isFinite(context.channelAvgViews)) {
+    metadataRows.push(["Channel avg views (this tab)", Math.round(context.channelAvgViews)])
+  }
+  if (context != null && Number.isFinite(context.avgEngagementPercent)) {
+    metadataRows.push(["Channel avg engagement % (this tab)", context.avgEngagementPercent.toFixed(2)])
+  }
 
-  const csv = [headers.join(","), ...rows.map((row) => row.join(","))].join("\n")
+  const headers = [
+    "Rank",
+    "Video Title",
+    "Video ID",
+    "YouTube URL",
+    "Views",
+    "Likes",
+    "Comments",
+    "Engagement Rate %",
+    "Performance Score (0-100)",
+    "Views vs Channel Avg %",
+    "Performance Tier",
+    "Published Date",
+    "Days Since Published",
+    "Duration",
+    "Duration Seconds",
+    "Format",
+  ]
+
+  const dataRows = sorted.map((video, index) => {
+    const published = parseISO(video.publishedAt)
+    const daysSince =
+      Number.isNaN(published.getTime()) ? "" : differenceInCalendarDays(new Date(), published)
+    const durSec = parseDurationSeconds(video.duration)
+    const vsAvg = Number.isFinite(video.trendDelta) ? Number(video.trendDelta.toFixed(2)) : ""
+
+    return [
+      index + 1,
+      video.title,
+      video.id,
+      `https://www.youtube.com/watch?v=${video.id}`,
+      Math.round(video.viewCount),
+      Math.round(video.likeCount),
+      Math.round(video.commentCount),
+      Number(video.engagementRate.toFixed(2)),
+      video.performanceScore,
+      vsAvg,
+      performanceTierLabel(video.performanceScore),
+      formatDate(video.publishedAt),
+      daysSince === "" ? "" : daysSince,
+      formatDuration(video.duration),
+      durSec,
+      video.isShort ? "Short" : "Long",
+    ]
+  })
+
+  const lines: string[] = []
+  lines.push("\uFEFF")
+  for (const [key, val] of metadataRows) {
+    lines.push(`${csvCell(key)},${csvCell(val)}`)
+  }
+  lines.push("")
+  lines.push(headers.map((h) => csvCell(h)).join(","))
+  for (const row of dataRows) {
+    lines.push(row.map((cell) => csvCell(cell)).join(","))
+  }
+
+  const csv = lines.join("\n")
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" })
   const url = URL.createObjectURL(blob)
 
   const safeName = channelName.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-") || "channelspy-report"
+  const suffix = tab === "shorts" ? "-shorts" : tab === "long" ? "-long" : ""
   const link = document.createElement("a")
   link.href = url
-  link.download = `${safeName}.csv`
+  link.download = `${safeName}${suffix}-analytics.csv`
   document.body.appendChild(link)
   link.click()
   document.body.removeChild(link)
   URL.revokeObjectURL(url)
+}
+
+function guidanceBlurb(): string {
+  return (
+    "Performance Score blends views vs channel average, engagement vs average, and recency. " +
+    "Views vs Channel Avg % is percent above/below this tab's average views. " +
+    "Filter or sort in Excel/Sheets by Tier, Score, or vs Avg to find winners and laggards."
+  )
+}
+
+function performanceTierLabel(score: number): string {
+  if (score >= 75) return "Excellent"
+  if (score >= 55) return "Strong"
+  if (score >= 35) return "Moderate"
+  return "Developing"
+}
+
+/** One CSV field: numbers unquoted (Excel-friendly); strings quoted. */
+function csvCell(value: string | number): string {
+  if (typeof value === "number") {
+    if (!Number.isFinite(value)) return ""
+    return String(value)
+  }
+  return escapeCsv(value)
 }
 
 function escapeCsv(value: string): string {

@@ -50,9 +50,10 @@ export function WelcomeIntroCard({ onProceed, className }: WelcomeIntroCardProps
         <button
           type="button"
           onClick={onProceed}
+          aria-label="Continue to channel search"
           className="group inline-flex h-[3.4rem] min-w-[9.4rem] items-center justify-center gap-2 rounded-[45px] border-[3px] border-[var(--accent-blue)] bg-[var(--text-primary)] px-5 text-[1.05rem] font-semibold text-[var(--bg-primary)] transition-all duration-300 hover:bg-[var(--accent-blue)] hover:text-white hover:text-[1.18rem] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-primary)] motion-reduce:transition-none"
         >
-          Proceed
+          Continue
           <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5 motion-reduce:transition-none" />
         </button>
       </div>

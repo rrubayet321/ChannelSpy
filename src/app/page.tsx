@@ -10,20 +10,22 @@ import { TopVideosChart } from "@/components/charts/TopVideosChart"
 import { EngagementChart } from "@/components/charts/EngagementChart"
 import { RecentWinnersChart } from "@/components/charts/RecentWinnersChart"
 import { GuidedInsightSummary } from "@/components/insights/GuidedInsightSummary"
+import { GridBackground } from "@/components/ui/GridBackground"
 import { OrbitLoader } from "@/components/ui/OrbitLoader"
+import { SaasLandingHero } from "@/components/ui/saas-landing-hero"
 import { Skeleton } from "@/components/ui/skeleton"
-import { SpecialText } from "@/components/ui/special-text"
-import { WelcomeIntroCard } from "@/components/ui/welcome-intro-card"
 import { useChannelData } from "@/hooks/useChannelData"
 import { buildGuidedInsightCards, type SummaryCardAction } from "@/lib/insights"
 import { exportToCSV, formatViews } from "@/lib/utils"
 import { AlertTriangle, ArrowLeft, Download, SearchX, ShieldAlert } from "lucide-react"
+import { ChartColorsGuide } from "@/components/analytics/ChartColorsGuide"
+import { LandingAttribution } from "@/components/landing/LandingAttribution"
 
 const KPI_ACCENTS = [
-  "border-l-2 border-l-[var(--accent-blue)]",
-  "border-l-2 border-l-[var(--accent-green)]",
-  "border-l-2 border-l-[var(--accent-amber)]",
-  "border-l-2 border-l-[var(--text-secondary)]",
+  "border-l-2 border-l-indigo-400/60",
+  "border-l-2 border-l-[#818cf8]/60",
+  "border-l-2 border-l-[#94a3b8]/60",
+  "border-l-2 border-l-white/15",
 ] as const
 
 export default function Home() {
@@ -33,7 +35,6 @@ export default function Home() {
   const [showDetailedSections, setShowDetailedSections] = useState(false)
   const [channelInput, setChannelInput] = useState("")
   const [showIntro, setShowIntro] = useState(true)
-  const [introTextAnimationKey, setIntroTextAnimationKey] = useState(0)
   const exampleHandles = ["@MrBeast", "@mkbhd", "@chriswillx"] as const
 
   const activeBucket =
@@ -98,105 +99,94 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)]">
+    <div className="min-h-screen bg-black text-[#f2f2f2]">
       <Header />
 
-      <main className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
+      <main
+        className={
+          showIntro
+            ? "w-full"
+            : "mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 sm:py-14"
+        }
+      >
         {showIntro ? (
-          <section className="flex min-h-[72vh] flex-col items-center justify-center py-8 sm:py-12">
-            <div className="intro-fade-up mb-8 text-center sm:mb-10">
-              <span
-                tabIndex={0}
-                className="inline-block cursor-default"
-                onMouseEnter={() => setIntroTextAnimationKey((prev) => prev + 1)}
-                onFocus={() => setIntroTextAnimationKey((prev) => prev + 1)}
-                aria-label="Introducing ChannelSpy heading"
-              >
-                <SpecialText
-                  key={introTextAnimationKey}
-                  className="!h-auto !leading-tight !font-heading text-2xl font-semibold tracking-[0.01em] text-[#f4f6ff] sm:text-4xl"
-                >
-                  Introducing ChannelSpy
-                </SpecialText>
-              </span>
+          <section className="relative overflow-x-hidden bg-black">
+            <GridBackground />
+            <div className="relative z-10">
+              <SaasLandingHero className="intro-fade-up" onGetStarted={() => setShowIntro(false)} />
             </div>
-            <WelcomeIntroCard onProceed={() => setShowIntro(false)} className="intro-fade-up" />
+            <LandingAttribution />
           </section>
         ) : (
           <>
             {!reportMode && (
               <>
-                <section className="mx-auto mb-20 max-w-4xl text-center sm:mb-24">
-              <span className="mb-6 inline-flex items-center rounded-full border border-[#252a33] bg-[#0f1218] px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-[#7c8596]">
-                YouTube channel insights
-              </span>
-
-              <h1 className="font-heading text-5xl font-bold leading-[1.1] tracking-tight text-white md:text-6xl">
-                Turn any YouTube channel
-                <br />
-                <span className="bg-gradient-to-r from-white to-[#888] bg-clip-text text-transparent">
-                  into clear insights.
-                </span>
-              </h1>
-
-              <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-[#7f8695]">
-                Paste a channel URL to quickly see views, audience response, recent growth, and top videos.
-              </p>
-
-              <div className="mt-10 space-y-5 sm:mt-12 sm:space-y-6">
-                <SearchInput
-                  isLoading={isLoading}
-                  onAnalyze={handleAnalyze}
-                  value={channelInput}
-                  onValueChange={setChannelInput}
-                />
-                <div className="flex flex-wrap items-center justify-center gap-2.5">
-                  {exampleHandles.map((handle) => (
-                    <button
-                      key={handle}
-                      type="button"
-                      disabled={isLoading}
-                      onClick={() => {
-                        setChannelInput(handle)
-                        void handleAnalyze(handle)
-                      }}
-                      className="rounded-full border border-[#2d3648] bg-[#111621] px-3 py-1 text-xs text-[#8e98ad] transition-colors hover:border-[#4e5e7a] hover:text-white disabled:opacity-50"
-                    >
-                      Try {handle}
-                    </button>
-                  ))}
+                <div className="mx-auto mb-6 max-w-3xl">
+                  <button
+                    type="button"
+                    onClick={() => setShowIntro(true)}
+                    className="inline-flex items-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-zinc-400 transition-colors hover:border-white/15 hover:bg-white/[0.06] hover:text-zinc-200"
+                  >
+                    <ArrowLeft className="h-4 w-4 shrink-0" aria-hidden />
+                    Back to home
+                  </button>
                 </div>
-              </div>
+                <section className="mx-auto mb-16 max-w-3xl text-center">
+                  <span className="mb-6 inline-flex items-center gap-2 rounded-full border border-indigo-500/20 bg-indigo-500/10 px-3.5 py-1.5 text-[10px] uppercase tracking-[0.2em] text-indigo-300/80">
+                    <span className="h-1.5 w-1.5 rounded-full bg-indigo-400" />
+                    YouTube Competitor Intelligence
+                  </span>
 
-              <div className="mt-9 flex flex-wrap items-center justify-center gap-x-6 gap-y-2.5 text-xs text-[#697286] sm:mt-10">
-                <span className="flex items-center gap-1.5">
-                  <span className="inline-block h-1.5 w-1.5 rounded-full bg-[var(--accent-green)]" />
-                  Works with @handles and full URLs
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <span className="inline-block h-1.5 w-1.5 rounded-full bg-[var(--accent-green)]" />
-                  No API key exposed on client
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <span className="inline-block h-1.5 w-1.5 rounded-full bg-[var(--accent-green)]" />
-                  Fast filtering
-                </span>
-              </div>
+                  <h1 className="font-heading text-5xl font-bold leading-[1.05] tracking-tight text-white md:text-6xl">
+                    Decode any channel.
+                    <br />
+                    <span className="text-white/60">Instantly.</span>
+                  </h1>
+
+                  <p className="mx-auto mt-5 max-w-lg text-base leading-relaxed text-zinc-300">
+                    Paste a competitor URL — get views, engagement, top videos, and posting patterns.
+                  </p>
+
+                  <div className="mt-10 space-y-4">
+                    <SearchInput
+                      isLoading={isLoading}
+                      onAnalyze={handleAnalyze}
+                      value={channelInput}
+                      onValueChange={setChannelInput}
+                    />
+                    <div className="flex flex-wrap items-center justify-center gap-2">
+                      {exampleHandles.map((handle) => (
+                        <button
+                          key={handle}
+                          type="button"
+                          disabled={isLoading}
+                          onClick={() => {
+                            setChannelInput(handle)
+                            void handleAnalyze(handle)
+                          }}
+                          className="rounded-full border border-white/10 px-3 py-1 text-xs text-zinc-400 transition-colors hover:border-indigo-500/30 hover:text-indigo-300 disabled:opacity-40"
+                        >
+                          {handle}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </section>
 
-                <section className="mb-10 grid gap-4 sm:grid-cols-3 sm:gap-6">
-                  <FeatureCard label="Inputs" description="Handle, channel ID, custom URL, and full channel links." />
-                  <FeatureCard label="Metrics" description="Views, audience response, and recent growth compared with normal performance." />
-                  <FeatureCard label="Output" description="Export a video report in one click." />
+                <section className="mb-12 grid gap-3 sm:grid-cols-3">
+                  <FeatureCard label="Inputs" description="@handle, channel ID, or URL" />
+                  <FeatureCard label="Analytics" description="Views, engagement & momentum" />
+                  <FeatureCard label="Export" description="One-click CSV download" />
                 </section>
+                <LandingAttribution />
               </>
             )}
 
             {reportMode && (
               <section className="space-y-10">
-            <section className="sticky top-14 z-20 rounded-2xl border border-[#222833] bg-[#0f131a]/95 p-4 backdrop-blur">
-              <div className="flex flex-col gap-3">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <section className="sticky top-14 z-20 min-w-0 rounded-2xl border border-white/6 bg-black/90 p-3 shadow-[0_4px_24px_rgba(0,0,0,0.5)] backdrop-blur-xl sm:p-4">
+              <div className="flex min-w-0 flex-col gap-3">
+                <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
@@ -206,20 +196,30 @@ export default function Home() {
                     >
                       <span className="sr-only">Back</span>
                       <span className="report-back-button-box" aria-hidden="true">
-                        <ArrowLeft className="report-back-button-elem" />
-                        <ArrowLeft className="report-back-button-elem" />
+                        <span className="report-back-button-frame">
+                          <ArrowLeft className="report-back-button-elem" />
+                        </span>
+                        <span className="report-back-button-frame">
+                          <ArrowLeft className="report-back-button-elem" />
+                        </span>
                       </span>
                     </button>
-                    <span className="text-xs uppercase tracking-[0.16em] text-[#7a8397]">Channel report</span>
                   </div>
-                  <div className="inline-flex rounded-xl border border-[#2b3343] bg-[#0e131d] p-1">
+                  <div
+                    className="inline-flex max-w-full flex-wrap rounded-xl border border-white/7 bg-white/4 p-1"
+                    role="tablist"
+                    aria-label="Report content type"
+                  >
                     <button
                       type="button"
                       onClick={() => setActiveTab("long")}
-                      className={`rounded-lg px-3 py-1.5 text-xs transition-colors ${
+                      role="tab"
+                      id="tab-long-videos"
+                      aria-selected={activeTab === "long"}
+                      className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
                         activeTab === "long"
-                          ? "bg-[#1c2433] text-white"
-                          : "text-[#8a93a6] hover:text-[#c2cad8]"
+                          ? "bg-indigo-500/20 text-indigo-300"
+                          : "text-zinc-400 hover:text-zinc-200"
                       }`}
                     >
                       Long Videos {data ? `(${data.longForm.videos.length})` : ""}
@@ -227,35 +227,41 @@ export default function Home() {
                     <button
                       type="button"
                       onClick={() => setActiveTab("shorts")}
-                      className={`rounded-lg px-3 py-1.5 text-xs transition-colors ${
+                      role="tab"
+                      id="tab-shorts-videos"
+                      aria-selected={activeTab === "shorts"}
+                      className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
                         activeTab === "shorts"
-                          ? "bg-[#1c2433] text-white"
-                          : "text-[#8a93a6] hover:text-[#c2cad8]"
+                          ? "bg-indigo-500/20 text-indigo-300"
+                          : "text-zinc-400 hover:text-zinc-200"
                       }`}
                     >
                       Shorts {data ? `(${data.shorts.videos.length})` : ""}
                     </button>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex min-w-0 flex-wrap items-center gap-1.5">
                   <button
                     type="button"
                     onClick={() => jumpToSection("overview")}
-                    className="rounded-lg border border-[#2d3648] bg-[#121824] px-2.5 py-1 text-xs text-[#a4aec2] transition-colors hover:border-[#4e5e7a] hover:text-white"
+                    aria-label="Jump to overview section"
+                    className="rounded-lg border border-white/8 px-2.5 py-1 text-xs text-zinc-400 transition-colors hover:border-indigo-500/25 hover:text-indigo-300"
                   >
                     Overview
                   </button>
                   <button
                     type="button"
                     onClick={() => jumpToSection("trends")}
-                    className="rounded-lg border border-[#2d3648] bg-[#121824] px-2.5 py-1 text-xs text-[#a4aec2] transition-colors hover:border-[#4e5e7a] hover:text-white"
+                    aria-label="Jump to trends section"
+                    className="rounded-lg border border-white/8 px-2.5 py-1 text-xs text-zinc-400 transition-colors hover:border-indigo-500/25 hover:text-indigo-300"
                   >
                     Trends
                   </button>
                   <button
                     type="button"
                     onClick={() => jumpToSection("videos")}
-                    className="rounded-lg border border-[#2d3648] bg-[#121824] px-2.5 py-1 text-xs text-[#a4aec2] transition-colors hover:border-[#4e5e7a] hover:text-white"
+                    aria-label="Jump to videos section"
+                    className="rounded-lg border border-white/8 px-2.5 py-1 text-xs text-zinc-400 transition-colors hover:border-indigo-500/25 hover:text-indigo-300"
                   >
                     Videos
                   </button>
@@ -267,53 +273,43 @@ export default function Home() {
             {!isLoading && error && <ErrorState code={errorCode} fallbackMessage={error} />}
             {!isLoading && data && activeBucket && (
               <>
-                <p className="text-center text-sm text-[var(--accent-green)]">
-                  {activeTab === "long" ? "Long video report is ready." : "Shorts report is ready."}
-                </p>
-                <p className="text-center text-xs text-[#768094]">
-                  How to read this dashboard: check overview first, then trends, then open the video list for actions.
-                </p>
                 <ChannelHeader channel={data.channel} />
                 <GuidedInsightSummary cards={guidedCards} onAction={handleGuidedAction} />
 
-            <section id="overview-section" className="grid grid-cols-2 gap-4 sm:gap-4 xl:grid-cols-4">
+            <section id="overview-section" className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
               <KpiCard
-                title="Typical Views"
+                title="Avg Views"
                 value={formatViews(activeBucket.avgViews)}
                 accent={KPI_ACCENTS[0]}
-                helper="What a normal upload usually gets in this tab."
+                helper="Per upload"
               />
               <KpiCard
-                title="Audience Connection"
+                title="Engagement"
                 value={`${activeBucket.avgEngagement.toFixed(2)}%`}
                 accent={KPI_ACCENTS[1]}
-                helper="How strongly viewers react through likes and comments."
+                helper="Likes + comments rate"
               />
               <KpiCard
                 title="Top Video"
                 value={activeBucket.topPerformers[0]?.title ?? "N/A"}
                 mono={false}
                 accent={KPI_ACCENTS[2]}
-                helper="Your strongest recent proof of what works."
+                helper="Best performer"
               />
               <KpiCard
                 title="Posting Rhythm"
                 value={activeBucket.postingFrequency.replace("videos", "uploads")}
                 mono={false}
                 accent={KPI_ACCENTS[3]}
-                helper="How often new videos are published."
+                helper="Upload frequency"
               />
             </section>
 
-            <section className="grid gap-4 sm:grid-cols-3">
+            <section className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
               <SecondaryMetricCard
                 title="Momentum"
                 value={formatMomentum(activeBucket.momentumPercent)}
-                helper={
-                  activeBucket.momentumPercent < 0
-                    ? "Recent uploads getting fewer views than older ones"
-                    : "Recent uploads getting more views than older ones"
-                }
+                helper={activeBucket.momentumPercent < 0 ? "Trending downward" : "Trending upward"}
                 tone={activeBucket.momentumPercent >= 0 ? "positive" : "negative"}
               />
               <SecondaryMetricCard
@@ -323,58 +319,77 @@ export default function Home() {
                 tone={activeBucket.consistencyScore >= 60 ? "positive" : "neutral"}
               />
               <SecondaryMetricCard
-                title="Views per Subscriber"
+                title="Views / Subscriber"
                 value={`${(viewsPerSubscriber * 100).toFixed(1)}%`}
-                helper={`About ${Math.round(Math.max(0, viewsPerSubscriber * 100))} in 100 subscribers watch each video`}
+                helper={`${Math.round(Math.max(0, viewsPerSubscriber * 100))} in 100 subscribers`}
                 tone={viewsPerSubscriber >= 0.05 ? "positive" : "neutral"}
               />
             </section>
 
             {!showDetailedSections && (
-              <section className="rounded-2xl border border-[#222833] bg-[#0f131a] p-5">
-                <p className="text-sm text-[#b8c2d8]">
-                  The key numbers are shown above. Open detailed charts when you are ready for a deeper view.
-                </p>
+              <section className="flex flex-col gap-3 rounded-2xl border border-white/5 bg-[#0a0a0a] px-4 py-4 shadow-[0_0_16px_rgba(99,102,241,0.04)] sm:flex-row sm:items-center sm:px-5">
                 <button
                   type="button"
                   onClick={() => setShowDetailedSections(true)}
-                  className="mt-3 inline-flex items-center rounded-lg border border-[#2c3340] bg-[#141a27] px-3 py-1.5 text-xs text-[#d7dbe6] transition-colors hover:border-[#4e5e7a] hover:text-white"
+                  className="inline-flex items-center gap-2 rounded-lg border border-indigo-500/25 bg-indigo-500/10 px-3.5 py-1.5 text-xs font-medium text-indigo-300 transition-colors hover:bg-indigo-500/18 hover:text-indigo-200"
                 >
-                  Show detailed charts
+                  View detailed charts
                 </button>
+                <span className="text-xs text-zinc-500">Views trend · engagement · top videos</span>
               </section>
             )}
 
             {showDetailedSections && (
             <section id="trends-section" className="space-y-4">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <h2 className="font-heading text-lg font-semibold tracking-tight text-white">Trends</h2>
-                <p className="text-xs text-[#778198]">{activeTab === "long" ? "Long videos" : "Shorts"}</p>
+                <div className="flex flex-wrap items-center gap-2">
+                  <h2 className="font-heading text-base font-semibold tracking-tight text-white">Trends</h2>
+                  <ChartColorsGuide />
+                </div>
+                <span className="text-xs text-zinc-500">{activeTab === "long" ? "Long videos" : "Shorts"}</span>
               </div>
-              <p className="text-xs text-[#8b93a8]">
-                See what is accelerating, what is stable, and which uploads are beating the channel baseline.
-              </p>
-              <div className="grid gap-4 xl:grid-cols-2">
-                <ViewsChart videos={activeBucket.videos} />
-                <EngagementChart videos={activeBucket.videos} />
+              <div className="grid min-w-0 gap-4 xl:grid-cols-2">
+                <div className="min-w-0 overflow-x-auto">
+                  <div className="min-w-[min(100%,340px)] xl:min-w-0">
+                    <ViewsChart videos={activeBucket.videos} />
+                  </div>
+                </div>
+                <div className="min-w-0 overflow-x-auto">
+                  <div className="min-w-[min(100%,340px)] xl:min-w-0">
+                    <EngagementChart videos={activeBucket.videos} />
+                  </div>
+                </div>
               </div>
-              <RecentWinnersChart videos={activeBucket.videos} baselineViews={activeBucket.avgViews} />
-              <TopVideosChart videos={activeBucket.videos} />
+              <div className="min-w-0 overflow-x-auto">
+                <div className="min-w-[min(100%,340px)] xl:min-w-0">
+                  <RecentWinnersChart videos={activeBucket.videos} baselineViews={activeBucket.avgViews} />
+                </div>
+              </div>
+              <div className="min-w-0 overflow-x-auto">
+                <div className="min-w-[min(100%,340px)] xl:min-w-0">
+                  <TopVideosChart videos={activeBucket.videos} />
+                </div>
+              </div>
             </section>
             )}
 
             {showDetailedSections && (
             <section id="videos-section" className="space-y-4">
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex items-center">
-                  <h2 className="text-lg font-semibold text-white">Video List</h2>
-                  <p className="ml-3 text-sm text-[#7a8397]">{activeBucket.videos.length} videos analyzed</p>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <h2 className="font-heading text-base font-semibold text-white">Videos</h2>
+                  <span className="text-xs text-zinc-500">{activeBucket.videos.length} analyzed</span>
                 </div>
                 <button
                   type="button"
-                  onClick={() => exportToCSV(activeBucket.videos, data.channel.title)}
+                  onClick={() =>
+                    exportToCSV(activeBucket.videos, data.channel.title, activeTab, {
+                      channelAvgViews: activeBucket.avgViews,
+                      avgEngagementPercent: activeBucket.avgEngagement,
+                    })
+                  }
                   disabled={activeBucket.videos.length === 0}
-                  className="inline-flex items-center gap-1 rounded-lg border border-[#2d3648] bg-[#121824] px-3 py-1.5 text-xs text-[#a4aec2] transition-colors hover:border-[#4e5e7a] hover:text-white disabled:opacity-50"
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-indigo-500/25 bg-indigo-500/10 px-3 py-1.5 text-xs font-medium text-indigo-300 transition-colors hover:bg-indigo-500/18 disabled:opacity-40"
                 >
                   <Download className="h-3.5 w-3.5" />
                   Export CSV
@@ -396,9 +411,9 @@ export default function Home() {
 
 function FeatureCard({ label, description }: { label: string; description: string }) {
   return (
-    <div className="rounded-2xl border border-[#222833] bg-[#0f131a] p-5 transition-colors hover:border-[#334056]">
-      <p className="mb-2 text-[10px] font-medium uppercase tracking-[0.15em] text-[#6bb0ff]">{label}</p>
-      <p className="text-sm leading-relaxed text-[#a4aec2]">{description}</p>
+    <div className="rounded-xl border border-white/8 bg-white/[0.03] px-4 py-3.5 shadow-[0_0_16px_rgba(99,102,241,0.03)] transition-all duration-200 hover:border-white/14 hover:shadow-[0_0_20px_rgba(99,102,241,0.08)]">
+      <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.15em] text-indigo-400">{label}</p>
+      <p className="text-sm text-zinc-400">{description}</p>
     </div>
   )
 }
@@ -417,10 +432,10 @@ function KpiCard({
   helper: string
 }) {
   return (
-    <div className={`rounded-2xl border border-[#222833] bg-[#0f131a] p-5 ${accent}`}>
-      <p className="text-[10px] uppercase tracking-[0.15em] text-[#7b8499]">{title}</p>
-      <p className={`mt-2 text-2xl font-semibold text-white sm:text-3xl ${mono ? "font-mono" : ""}`}>{value}</p>
-      <p className="mt-2 text-xs leading-relaxed text-[#929bb0]">{helper}</p>
+    <div className={`group rounded-2xl border border-white/8 bg-[#0c0c0c] p-5 shadow-[0_0_20px_rgba(99,102,241,0.04)] transition-all duration-200 hover:-translate-y-0.5 hover:border-white/14 hover:shadow-[0_0_24px_rgba(99,102,241,0.1)] ${accent}`}>
+      <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-zinc-400">{title}</p>
+      <p className={`mt-2.5 break-words text-xl font-bold text-white sm:text-2xl xl:text-3xl ${mono ? "font-mono" : "font-heading"}`}>{value}</p>
+      <p className="mt-1.5 text-[11px] text-zinc-500">{helper}</p>
     </div>
   )
 }
@@ -438,16 +453,23 @@ function SecondaryMetricCard({
 }) {
   const toneClass =
     tone === "positive"
-      ? "border-[#3ecf8e]/30 bg-[#3ecf8e]/5"
+      ? "border-[#3ecf8e]/18 bg-[#3ecf8e]/4"
       : tone === "negative"
-        ? "border-[#f04444]/30 bg-[#f04444]/5"
-        : "border-[#222833] bg-[#0f131a]"
+        ? "border-[#f04444]/18 bg-[#f04444]/4"
+        : "border-white/6 bg-[#0a0a0a]"
+
+  const valueColor =
+    tone === "positive"
+      ? "text-[#3ecf8e]"
+      : tone === "negative"
+        ? "text-[#f04444]"
+        : "text-white"
 
   return (
-    <div className={`rounded-2xl border p-4 ${toneClass}`}>
-      <p className="text-[10px] uppercase tracking-[0.14em] text-[#7b8499]">{title}</p>
-      <p className="mt-1 font-mono text-2xl font-semibold text-white">{value}</p>
-      <p className="mt-1 text-xs text-[#a0aac0]">{helper}</p>
+    <div className={`rounded-2xl border p-4 shadow-[0_0_20px_rgba(99,102,241,0.04)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_0_24px_rgba(99,102,241,0.08)] ${toneClass}`}>
+      <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-zinc-400">{title}</p>
+      <p className={`mt-1.5 font-mono text-2xl font-bold ${valueColor}`}>{value}</p>
+      <p className="mt-1 text-[11px] text-zinc-500">{helper}</p>
     </div>
   )
 }

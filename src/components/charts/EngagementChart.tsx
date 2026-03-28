@@ -1,86 +1,60 @@
 "use client"
 
-import { useMemo } from "react"
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts"
-
+import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 import type { Video } from "@/lib/types"
-import { formatEngagement } from "@/lib/utils"
-
-import { tooltipHideCursor } from "@/components/charts/chartInteraction"
 
 type EngagementChartProps = {
   videos: Video[]
 }
 
 export function EngagementChart({ videos }: EngagementChartProps) {
-  const chartData = useMemo(() => {
-    return [...videos]
-      .sort(
-        (a, b) =>
-          new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime(),
-      )
-      .slice(0, 20)
-      .reverse()
-      .map((video) => ({
-        id: video.id,
-        title: truncateTitle(video.title, 18),
-        fullTitle: video.title,
-        engagementRate: video.engagementRate,
-      }))
-  }, [videos])
+  const data = videos
+    .slice()
+    .sort((a, b) => new Date(a.publishedAt).getTime() - new Date(b.publishedAt).getTime())
+    .slice(-20)
+    .map((v) => ({
+      name: v.title.length > 22 ? v.title.slice(0, 22) + "…" : v.title,
+      engagement: parseFloat(v.engagementRate.toFixed(2)),
+    }))
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-[#222833] bg-[#0f131a] p-5">
-      <p className="mb-3 text-sm font-semibold text-white">Audience Connection by Video</p>
-      <div className="h-72 w-full">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={chartData} margin={{ top: 8, right: 8, left: 8, bottom: 8 }}>
-            <CartesianGrid stroke="#273041" strokeDasharray="3 3" />
-            <XAxis dataKey="title" tick={{ fill: "#7b8499", fontSize: 11 }} />
-            <YAxis
-              tick={{ fill: "#7b8499", fontSize: 11 }}
-              tickFormatter={(value) => `${Number(value).toFixed(1)}%`}
-            />
-            <Tooltip
-              {...tooltipHideCursor}
-              contentStyle={{
-                backgroundColor: "#141a24",
-                border: "1px solid #2b3343",
-                borderRadius: "0.75rem",
-                color: "#f0f0f0",
-              }}
-              labelStyle={{ color: "#f0f0f0" }}
-              formatter={(value: unknown) => [formatEngagement(Number(value ?? 0)), "Engagement"]}
-              labelFormatter={(_, payload) => payload?.[0]?.payload?.fullTitle ?? "Video"}
-            />
-            <Bar
-              dataKey="engagementRate"
-              fill="#f5a623"
-              radius={[4, 4, 0, 0]}
-              activeBar={{
-                fill: "#ffc14d",
-                stroke: "#ffd78a",
-                strokeWidth: 1.5,
-                fillOpacity: 1,
-                style: { filter: "drop-shadow(0 0 10px rgba(245, 166, 35, 0.45))" },
-              }}
-            />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
+    <div className="rounded-2xl border border-white/10 bg-[#09090b] p-5 shadow-[0_0_24px_rgba(99,102,241,0.06)]">
+      <p className="mb-4 text-xs font-medium uppercase tracking-[0.14em] text-zinc-300">
+        Engagement by Video
+      </p>
+      <ResponsiveContainer width="100%" height={220}>
+        <BarChart data={data} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+          <defs>
+            <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#818cf8" />
+              <stop offset="100%" stopColor="#6366f1" />
+            </linearGradient>
+          </defs>
+          <CartesianGrid stroke="rgba(255,255,255,0.06)" strokeDasharray="3 3" vertical={false} />
+          <XAxis dataKey="name" tick={false} axisLine={false} tickLine={false} />
+          <YAxis
+            tickFormatter={(v: number) => `${v}%`}
+            tick={{ fontSize: 10, fill: "rgba(255,255,255,0.5)" }}
+            axisLine={false}
+            tickLine={false}
+          />
+          <Tooltip
+            contentStyle={{
+              background: "#18181b",
+              border: "1px solid rgba(99,102,241,0.3)",
+              borderRadius: 10,
+              fontSize: 12,
+              color: "#f5f5f5",
+              padding: "8px 12px",
+              fontFamily: "inherit",
+            }}
+            formatter={(value) => [`${Number(value ?? 0).toFixed(2)}%`, "Engagement"]}
+            labelFormatter={(label) => String(label ?? "")}
+            cursor={{ fill: "rgba(99,102,241,0.08)" }}
+          />
+          <Bar dataKey="engagement" fill="url(#barGradient)" radius={[4, 4, 0, 0]} maxBarSize={28} />
+        </BarChart>
+      </ResponsiveContainer>
     </div>
   )
-}
-
-function truncateTitle(title: string, maxLength: number): string {
-  if (title.length <= maxLength) return title
-  return `${title.slice(0, maxLength - 1)}…`
 }
