@@ -1,9 +1,13 @@
 import { describe, expect, it } from "vitest"
 
 import {
+  calculateMedian,
+  calculatePercentile,
   calcPerformanceScore,
   calcTrendDelta,
   formatViews,
+  getConfidenceTier,
+  getIqrBounds,
   parseChannelUrl,
   parseDurationSeconds,
 } from "@/lib/utils"
@@ -76,5 +80,33 @@ describe("calcPerformanceScore", () => {
     const low = calcPerformanceScore({ viewCount: 50, engagementRate: 1 }, 100, 2)
     const high = calcPerformanceScore({ viewCount: 300, engagementRate: 6 }, 100, 2)
     expect(high).toBeGreaterThan(low)
+  })
+})
+
+describe("robust analytics helpers", () => {
+  it("calculates median correctly", () => {
+    expect(calculateMedian([1, 9, 3])).toBe(3)
+    expect(calculateMedian([1, 3, 9, 11])).toBe(6)
+    expect(calculateMedian([])).toBe(0)
+  })
+
+  it("calculates percentiles on sorted distribution", () => {
+    const values = [10, 20, 30, 40, 50]
+    expect(calculatePercentile(values, 25)).toBe(20)
+    expect(calculatePercentile(values, 50)).toBe(30)
+    expect(calculatePercentile(values, 75)).toBe(40)
+  })
+
+  it("builds IQR bounds and handles small samples", () => {
+    expect(getIqrBounds([1, 2, 3])).toBeNull()
+    const bounds = getIqrBounds([100, 110, 120, 130, 150, 160, 500])
+    expect(bounds).not.toBeNull()
+    expect(bounds!.upper).toBeLessThan(500)
+  })
+
+  it("assigns confidence tiers from sample size", () => {
+    expect(getConfidenceTier(3)).toBe("Low")
+    expect(getConfidenceTier(10)).toBe("Medium")
+    expect(getConfidenceTier(25)).toBe("High")
   })
 })

@@ -77,6 +77,7 @@ export function VideoCard({ video, channelAvgViews, index }: VideoCardProps) {
           label={aboveAverage ? "Above avg" : "Below avg"}
           tone={aboveAverage ? "green" : "red"}
         />
+        {video.isViewOutlier ? <MetricBadge label="Unusual spike" tone="amber" /> : null}
       </div>
 
       {/* Stats row */}

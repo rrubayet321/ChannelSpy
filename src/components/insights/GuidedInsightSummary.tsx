@@ -6,9 +6,10 @@ import type { GuidedInsightCard } from "@/lib/insights"
 type GuidedInsightSummaryProps = {
   cards: GuidedInsightCard[]
   onAction: (action: GuidedInsightCard["action"]) => void
+  confidence?: "Low" | "Medium" | "High"
 }
 
-export function GuidedInsightSummary({ cards, onAction }: GuidedInsightSummaryProps) {
+export function GuidedInsightSummary({ cards, onAction, confidence }: GuidedInsightSummaryProps) {
   const iconByCardId: Record<
     GuidedInsightCard["id"],
     { icon: typeof TrendingUp; iconClass: string; borderClass: string }
@@ -21,6 +22,15 @@ export function GuidedInsightSummary({ cards, onAction }: GuidedInsightSummaryPr
   return (
     <section className="space-y-3">
       <h2 className="font-heading text-base font-semibold tracking-tight text-white">Quick Read</h2>
+      {confidence ? (
+        <p className="text-xs text-zinc-400">
+          Confidence:{" "}
+          <span className="rounded border border-indigo-500/20 bg-indigo-500/10 px-1.5 py-0.5 text-indigo-300">
+            {confidence}
+          </span>
+          {" "}signal quality based on sample size.
+        </p>
+      ) : null}
 
       <div className="grid gap-3 xl:grid-cols-3">
         {cards.map((card) => {

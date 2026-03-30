@@ -4,9 +4,14 @@ import { useCallback, useMemo, useRef, useState } from "react"
 
 import type { AnalyticsBucket, Channel, ChannelAnalytics, ParsedChannelInput, Video } from "@/lib/types"
 import {
+  calculateAverage,
+  calculateMedian,
+  calculatePercentile,
   calcEngagementRate,
   calcPerformanceScore,
   calcTrendDelta,
+  getConfidenceTier,
+  getIqrBounds,
   isShortVideo,
   parseChannelUrl,
 } from "@/lib/utils"
@@ -293,12 +298,6 @@ async function fetchStatsMap(videoIds: string[]): Promise<Map<string, StatsActio
   return statsMap
 }
 
-function calculateAverage(values: number[]): number {
-  if (values.length === 0) return 0
-  const total = values.reduce((sum, value) => sum + value, 0)
-  return total / values.length
-}
-
 function buildAnalyticsBucket(
   videos: Array<
     Pick<Video, "id" | "title" | "thumbnailUrl" | "publishedAt" | "duration" | "viewCount" | "likeCount" | "commentCount"> & {
@@ -311,7 +310,15 @@ function buildAnalyticsBucket(
     return {
       videos: [],
       avgViews: 0,
+      typicalViews: 0,
       avgEngagement: 0,
+      confidence: "Low",
+      breakoutRate: 0,
+      viewPercentiles: {
+        p25: 0,
+        p50: 0,
+        p75: 0,
+      },
       momentumPercent: 0,
       consistencyScore: 0,
       postingFrequency: "~N/A",
@@ -319,27 +326,76 @@ function buildAnalyticsBucket(
     }
   }
 
-  const avgViews = calculateAverage(videos.map((video) => video.viewCount))
-  const avgEngagement = calculateAverage(videos.map((video) => video.engagementRate))
+  const viewValues = videos.map((video) => video.viewCount)
+  const engagementValues = videos.map((video) => video.engagementRate)
+  const rawAvgViews = calculateAverage(viewValues)
+  const avgEngagement = calculateAverage(engagementValues)
+  const typicalViews = calculateMedian(viewValues)
+  const iqrBounds = getIqrBounds(viewValues)
+
+  const baselineVideos =
+    iqrBounds == null
+      ? videos
+      : videos.filter(
+          (video) => video.viewCount >= iqrBounds.lower && video.viewCount <= iqrBounds.upper,
+        )
+
+  const avgViews =
+    baselineVideos.length > 0
+      ? calculateAverage(baselineVideos.map((video) => video.viewCount))
+      : rawAvgViews
+
+  const robustBaselineViews = typicalViews > 0 ? typicalViews : avgViews
+  const viewPercentiles = {
+    p25: calculatePercentile(viewValues, 25),
+    p50: calculatePercentile(viewValues, 50),
+    p75: calculatePercentile(viewValues, 75),
+  }
+
+  const sortedByRecent = [...videos].sort(
+    (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime(),
+  )
+  const recencyWeights = new Map<string, number>(
+    sortedByRecent.map((video, index) => [video.id, 1 + Math.max(0, 12 - index) * 0.02]),
+  )
 
   const enrichedVideos: Video[] = videos.map((video) => {
-    const performanceScore = calcPerformanceScore(video, avgViews, avgEngagement)
-    const trendDelta = calcTrendDelta(video, avgViews)
+    const performanceScore = calcPerformanceScore(video, robustBaselineViews, avgEngagement)
+    const trendDelta = calcTrendDelta(video, robustBaselineViews)
+    const isViewOutlier =
+      iqrBounds != null &&
+      (video.viewCount < iqrBounds.lower || video.viewCount > iqrBounds.upper)
     return {
       ...video,
+      isViewOutlier,
       performanceScore,
       trendDelta,
     }
   })
 
   const topPerformers = [...enrichedVideos]
-    .sort((a, b) => b.performanceScore - a.performanceScore)
+    .sort(
+      (a, b) =>
+        b.performanceScore * (recencyWeights.get(b.id) ?? 1) -
+        a.performanceScore * (recencyWeights.get(a.id) ?? 1),
+    )
     .slice(0, 3)
+
+  const breakoutThreshold = robustBaselineViews * 1.5
+  const breakoutCount =
+    breakoutThreshold > 0
+      ? enrichedVideos.filter((video) => video.viewCount >= breakoutThreshold).length
+      : 0
+  const breakoutRate = enrichedVideos.length > 0 ? (breakoutCount / enrichedVideos.length) * 100 : 0
 
   return {
     videos: enrichedVideos,
     avgViews,
+    typicalViews,
     avgEngagement,
+    confidence: getConfidenceTier(enrichedVideos.length),
+    breakoutRate,
+    viewPercentiles,
     momentumPercent: calculateMomentumPercent(enrichedVideos),
     consistencyScore: calculateConsistencyScore(enrichedVideos),
     postingFrequency: calculatePostingFrequency(enrichedVideos),

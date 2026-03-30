@@ -20,6 +20,7 @@ export interface Video {
   publishedAt: string
   duration: string
   isShort: boolean
+  isViewOutlier?: boolean
   viewCount: number
   likeCount: number
   commentCount: number
@@ -31,7 +32,15 @@ export interface Video {
 export interface AnalyticsBucket {
   videos: Video[]
   avgViews: number
+  typicalViews: number
   avgEngagement: number
+  confidence: "Low" | "Medium" | "High"
+  breakoutRate: number
+  viewPercentiles: {
+    p25: number
+    p50: number
+    p75: number
+  }
   momentumPercent: number
   consistencyScore: number
   postingFrequency: string

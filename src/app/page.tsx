@@ -43,12 +43,6 @@ export default function Home() {
     () => (activeBucket ? buildGuidedInsightCards(activeBucket, activeTab) : []),
     [activeBucket, activeTab],
   )
-  const viewsPerSubscriber =
-    data != null && data.channel.subscriberCount > 0
-      ? activeBucket != null
-        ? activeBucket.avgViews / data.channel.subscriberCount
-        : 0
-      : 0
 
   const handleAnalyze = async (input: string) => {
     setReportMode(true)
@@ -273,14 +267,18 @@ export default function Home() {
             {!isLoading && data && activeBucket && (
               <>
                 <ChannelHeader channel={data.channel} />
-                <GuidedInsightSummary cards={guidedCards} onAction={handleGuidedAction} />
+                <GuidedInsightSummary
+                  cards={guidedCards}
+                  onAction={handleGuidedAction}
+                  confidence={activeBucket.confidence}
+                />
 
             <section id="overview-section" className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
               <KpiCard
-                title="Avg Views"
-                value={formatViews(activeBucket.avgViews)}
+                title="Typical Views"
+                value={formatViews(activeBucket.typicalViews)}
                 accent={KPI_ACCENTS[0]}
-                helper="Per upload"
+                helper="Usual views per upload"
               />
               <KpiCard
                 title="Engagement"
@@ -304,7 +302,7 @@ export default function Home() {
               />
             </section>
 
-            <section className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
+            <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4 sm:gap-4">
               <SecondaryMetricCard
                 title="Momentum"
                 value={formatMomentum(activeBucket.momentumPercent)}
@@ -312,16 +310,22 @@ export default function Home() {
                 tone={activeBucket.momentumPercent >= 0 ? "positive" : "negative"}
               />
               <SecondaryMetricCard
-                title="Consistency"
+                title="How steady results are"
                 value={`${activeBucket.consistencyScore}/100`}
                 helper={consistencyExplanation(activeBucket.consistencyScore)}
                 tone={activeBucket.consistencyScore >= 60 ? "positive" : "neutral"}
               />
               <SecondaryMetricCard
-                title="Views / Subscriber"
-                value={`${(viewsPerSubscriber * 100).toFixed(1)}%`}
-                helper={`${Math.round(Math.max(0, viewsPerSubscriber * 100))} in 100 subscribers`}
-                tone={viewsPerSubscriber >= 0.05 ? "positive" : "neutral"}
+                title="Beat-usual rate"
+                value={`${Math.round(activeBucket.breakoutRate)}%`}
+                helper="How often uploads beat their usual performance"
+                tone={activeBucket.breakoutRate >= 25 ? "positive" : "neutral"}
+              />
+              <SecondaryMetricCard
+                title="Confidence"
+                value={activeBucket.confidence}
+                helper="Signal strength based on video sample size"
+                tone={confidenceTone(activeBucket.confidence)}
               />
             </section>
 
@@ -393,7 +397,7 @@ export default function Home() {
                   Export CSV
                 </button>
               </div>
-              <VideoGrid videos={activeBucket.videos} channelAvgViews={activeBucket.avgViews} />
+              <VideoGrid videos={activeBucket.videos} channelAvgViews={activeBucket.typicalViews} />
             </section>
             )}
               </>
@@ -482,6 +486,12 @@ function consistencyExplanation(score: number): string {
   if (score >= 75) return "Uploads are very evenly spaced"
   if (score >= 55) return "Uploads are fairly evenly spaced"
   return "Uploads are not evenly spaced"
+}
+
+function confidenceTone(confidence: "Low" | "Medium" | "High"): "positive" | "neutral" | "negative" {
+  if (confidence === "High") return "positive"
+  if (confidence === "Medium") return "neutral"
+  return "negative"
 }
 
 function LoadingState() {

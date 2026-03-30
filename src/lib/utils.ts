@@ -98,6 +98,51 @@ export function calcTrendDelta(
   return ((video.viewCount - channelAvgViews) / channelAvgViews) * 100
 }
 
+export function calculateAverage(values: number[]): number {
+  if (values.length === 0) return 0
+  const total = values.reduce((sum, value) => sum + value, 0)
+  return total / values.length
+}
+
+export function calculateMedian(values: number[]): number {
+  if (values.length === 0) return 0
+  const sorted = [...values].sort((a, b) => a - b)
+  const middle = Math.floor(sorted.length / 2)
+  if (sorted.length % 2 === 0) {
+    return (sorted[middle - 1] + sorted[middle]) / 2
+  }
+  return sorted[middle]
+}
+
+export function calculatePercentile(values: number[], percentile: number): number {
+  if (values.length === 0) return 0
+  const sorted = [...values].sort((a, b) => a - b)
+  const normalizedPercentile = Math.max(0, Math.min(100, percentile))
+  const index = (normalizedPercentile / 100) * (sorted.length - 1)
+  const lower = Math.floor(index)
+  const upper = Math.ceil(index)
+  if (lower === upper) return sorted[lower]
+  const weight = index - lower
+  return sorted[lower] * (1 - weight) + sorted[upper] * weight
+}
+
+export function getIqrBounds(values: number[]): { lower: number; upper: number } | null {
+  if (values.length < 4) return null
+  const q1 = calculatePercentile(values, 25)
+  const q3 = calculatePercentile(values, 75)
+  const iqr = q3 - q1
+  return {
+    lower: q1 - iqr * 1.5,
+    upper: q3 + iqr * 1.5,
+  }
+}
+
+export function getConfidenceTier(sampleSize: number): "Low" | "Medium" | "High" {
+  if (sampleSize >= 20) return "High"
+  if (sampleSize >= 8) return "Medium"
+  return "Low"
+}
+
 export function parseChannelUrl(input: string): ParsedChannelInput {
   const raw = input.trim()
   if (!raw) {

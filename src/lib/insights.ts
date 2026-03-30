@@ -18,19 +18,20 @@ export function buildGuidedInsightCards(
   const contentLabel = tab === "long" ? "long videos" : "shorts"
   const trendDirection = bucket.momentumPercent >= 0 ? "up" : "down"
   const trendMagnitude = Math.abs(bucket.momentumPercent).toFixed(0)
+  const breakoutRate = Math.round(bucket.breakoutRate)
 
   const pulseSummary =
     bucket.videos.length > 0
-      ? `This channel averages ${Math.round(bucket.avgViews).toLocaleString()} views per ${contentLabel} upload.`
+      ? `Typical views are about ${Math.round(bucket.typicalViews).toLocaleString()} per ${contentLabel} upload (${bucket.confidence} confidence).`
       : "This channel needs more videos in this tab before trends can be trusted."
 
   const trendSummary =
     bucket.videos.length > 0
-      ? `Recent performance is ${trendDirection} ${trendMagnitude}% compared with earlier uploads.`
+      ? `Recent performance is ${trendDirection} ${trendMagnitude}% and about ${breakoutRate}% of uploads beat the usual baseline.`
       : "Recent trend is neutral because there is not enough history yet."
 
   const nextSummary = topVideo
-    ? `Use "${topVideo.title}" as a model for the next publish because it is currently the strongest performer.`
+    ? `Use "${topVideo.title}" as a model and aim for the same format/packaging style in your next release.`
     : "Publish one more video in this tab to unlock stronger recommendations."
 
   return [
