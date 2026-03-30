@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useMemo, useRef, useState } from "react"
 
 import type { AnalyticsBucket, Channel, ChannelAnalytics, ParsedChannelInput, Video } from "@/lib/types"
 import {
@@ -71,7 +71,11 @@ export function useChannelData(): UseChannelDataResult {
     errorCode: null,
   })
 
+  /** Bumps when a new analysis starts or `clear` runs so stale async work cannot overwrite state. */
+  const analysisGenerationRef = useRef(0)
+
   const clear = useCallback(() => {
+    analysisGenerationRef.current += 1
     setState({
       data: null,
       isLoading: false,
@@ -82,8 +86,13 @@ export function useChannelData(): UseChannelDataResult {
 
   const analyzeChannel = useCallback(
     async (input: string, options?: { forceRefresh?: boolean }): Promise<ChannelAnalytics | null> => {
+      const requestGeneration = ++analysisGenerationRef.current
+
+      const isStale = () => requestGeneration !== analysisGenerationRef.current
+
       const parsedInput = parseChannelUrl(input)
       if (!parsedInput.value) {
+        if (isStale()) return null
         setState((prev) => ({
           ...prev,
           isLoading: false,
@@ -96,6 +105,7 @@ export function useChannelData(): UseChannelDataResult {
       const cacheKey = toCacheKey(parsedInput)
       if (!options?.forceRefresh && analyticsCache.has(cacheKey)) {
         const cachedData = analyticsCache.get(cacheKey) ?? null
+        if (isStale()) return null
         setState({
           data: cachedData,
           isLoading: false,
@@ -116,6 +126,8 @@ export function useChannelData(): UseChannelDataResult {
         const channelResponse = await fetchChannel(parsedInput)
         const allVideos = await fetchPlaylistVideos(channelResponse.uploadsPlaylistId)
         const statsById = await fetchStatsMap(allVideos.map((video) => video.id))
+
+        if (isStale()) return null
 
         const mergedBase = allVideos
           .map((playlistVideo) => {
@@ -155,6 +167,7 @@ export function useChannelData(): UseChannelDataResult {
         }
 
         analyticsCache.set(cacheKey, analytics)
+        if (isStale()) return null
         setState({
           data: analytics,
           isLoading: false,
@@ -163,6 +176,7 @@ export function useChannelData(): UseChannelDataResult {
         })
         return analytics
       } catch (error) {
+        if (isStale()) return null
         const details = normalizeUnknownError(error)
         setState({
           data: null,

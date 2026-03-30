@@ -102,7 +102,6 @@ async function handleChannelAction(params: URLSearchParams, apiKey: string) {
   const brandingSettings = asRecord(item?.brandingSettings)
   const image = asRecord(brandingSettings?.image)
   const thumbnails = asRecord(snippet?.thumbnails)
-  const status = asRecord(item?.status)
   const relatedPlaylists = asRecord(contentDetails?.relatedPlaylists)
 
   const normalized = {
@@ -118,7 +117,6 @@ async function handleChannelAction(params: URLSearchParams, apiKey: string) {
       viewCount: safeNumber(statistics?.viewCount),
       publishedAt: asString(snippet?.publishedAt),
       uploadsPlaylistId: asString(relatedPlaylists?.uploads),
-      verified: asString(status?.longUploadsStatus) === "allowed",
     },
   }
 
