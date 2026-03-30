@@ -6,12 +6,14 @@
 ![Tailwind](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?logo=tailwindcss&logoColor=white)
 ![Recharts](https://img.shields.io/badge/Recharts-3-22C55E)
 ![YouTube](https://img.shields.io/badge/API-YouTube_Data_v3-FF0000?logo=youtube&logoColor=white)
-![Tests](https://img.shields.io/badge/Tests-11%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/Tests-15%20passing-brightgreen)
 ![License](https://img.shields.io/badge/License-MIT-lightgrey)
 
 > You have ten competitor tabs open and a spreadsheet that is already wrong.
 
 **ChannelSpy** is a Next.js app that turns any public YouTube channel into a **clean analytics report** in one paste: KPIs, trend charts, sortable video intelligence, plain-language “Quick Read” cards, and a **decision-ready CSV export** — without exposing API keys in the browser.
+
+It’s designed to stay **easy to understand**: key metrics include short “What this means” tooltips, and baselines avoid being thrown off by one viral outlier.
 
 Built as a full-stack project to explore **App Router**, **server-only secrets**, **Recharts**, and **quota-conscious** YouTube Data API v3 usage.
 
@@ -26,7 +28,7 @@ User pastes @handle, /channel/ID, or full YouTube URL
            ↓
   Next.js route handler fetches channel + uploads playlist + video stats
            ↓
-  Client merges data: Long vs Shorts buckets, scores, momentum, consistency
+  Client merges data: Long vs Shorts buckets, scores, momentum, steadiness, breakout rate
            ↓
   Dashboard: Quick Read → KPIs → charts → filterable video grid → Export CSV
 ```
@@ -69,7 +71,15 @@ flowchart LR
 
 **Long vs Shorts split** — Videos are classified by duration (≤3 minutes = Short). Averages, momentum, and charts stay meaningful instead of blending incompatible formats.
 
-**Performance score (0–100)** — Per video: **views vs channel average** (capped at 3×, up to **55** pts) plus **engagement vs channel average** (capped at 3×, up to **45** pts). Top performers land in a **70–90+** range on healthy channels.
+**Robust baselines** — “Typical Views” uses a median-first baseline and smooths the effect of extreme spikes so comparisons feel more reliable across channels.
+
+**Unusual spike labeling** — Videos that are far outside a channel’s usual view range are tagged as **“Unusual spike”** (they’re still shown, just treated carefully in baseline math).
+
+**Beat-usual rate** — Shows how often a channel uploads videos that beat their usual baseline (a quick signal for repeat winners vs one-off hits).
+
+**Confidence label** — Each report bucket shows a simple **Low / Medium / High** confidence indicator based on sample size (so users don’t over-trust tiny samples).
+
+**Performance score (0–100)** — Per video: **views vs typical baseline** (up to **55** pts) plus **engagement vs channel typical** (up to **45** pts). Top performers land in a **70–90+** range on healthy channels.
 
 **CSV export** — UTF-8 BOM for Excel, a short metadata block, then rows sorted by score with human column names (`Views`, `Performance Tier`, `Views vs Channel Avg %`, etc.).
 
@@ -135,7 +145,7 @@ Unit tests mock **nothing** for YouTube — they target **pure helpers** (`parse
 
 ```bash
 npm run test
-# 11 tests, sub-second
+# 15 tests, sub-second
 ```
 
 ---
@@ -143,7 +153,7 @@ npm run test
 ## Known Limitations
 
 - Fetches are capped (e.g. **200** recent uploads per analysis) to stay within reasonable quota and latency.
-- **Momentum** and **consistency** need enough published videos; small channels may show `0` or `~N/A` where data is insufficient.
+- **Momentum**, **steadiness**, and **confidence** need enough published videos; small channels may show `0`, `~N/A`, or **Low** confidence where data is insufficient.
 - Thumbnails rely on YouTube/Google CDNs; `next.config.ts` `images.remotePatterns` must include hosts your deployment uses.
 
 ---

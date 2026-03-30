@@ -11,6 +11,7 @@ import { EngagementChart } from "@/components/charts/EngagementChart"
 import { RecentWinnersChart } from "@/components/charts/RecentWinnersChart"
 import { GuidedInsightSummary } from "@/components/insights/GuidedInsightSummary"
 import { GridBackground } from "@/components/ui/GridBackground"
+import { InfoTooltip } from "@/components/ui/InfoTooltip"
 import { OrbitLoader } from "@/components/ui/OrbitLoader"
 import { SaasLandingHero } from "@/components/ui/saas-landing-hero"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -279,6 +280,7 @@ export default function Home() {
                 value={formatViews(activeBucket.typicalViews)}
                 accent={KPI_ACCENTS[0]}
                 helper="Usual views per upload"
+                tooltip="Usual views per upload, after smoothing unusual spikes."
               />
               <KpiCard
                 title="Engagement"
@@ -308,24 +310,28 @@ export default function Home() {
                 value={formatMomentum(activeBucket.momentumPercent)}
                 helper={activeBucket.momentumPercent < 0 ? "Trending downward" : "Trending upward"}
                 tone={activeBucket.momentumPercent >= 0 ? "positive" : "negative"}
+                tooltip="Recent uploads are doing better or worse than earlier ones."
               />
               <SecondaryMetricCard
                 title="How steady results are"
                 value={`${activeBucket.consistencyScore}/100`}
                 helper={consistencyExplanation(activeBucket.consistencyScore)}
                 tone={activeBucket.consistencyScore >= 60 ? "positive" : "neutral"}
+                tooltip="Shows whether performance is consistent or swings a lot."
               />
               <SecondaryMetricCard
                 title="Beat-usual rate"
                 value={`${Math.round(activeBucket.breakoutRate)}%`}
                 helper="How often uploads beat their usual performance"
                 tone={activeBucket.breakoutRate >= 25 ? "positive" : "neutral"}
+                tooltip="Share of uploads that beat the channel’s usual baseline."
               />
               <SecondaryMetricCard
                 title="Confidence"
                 value={activeBucket.confidence}
                 helper="Signal strength based on video sample size"
                 tone={confidenceTone(activeBucket.confidence)}
+                tooltip="How reliable this signal is based on sample size."
               />
             </section>
 
@@ -426,16 +432,21 @@ function KpiCard({
   mono = true,
   accent,
   helper,
+  tooltip,
 }: {
   title: string
   value: string
   mono?: boolean
   accent: string
   helper: string
+  tooltip?: string
 }) {
   return (
     <div className={`group rounded-2xl border border-white/8 bg-[#0c0c0c] p-5 shadow-[0_0_20px_rgba(99,102,241,0.04)] transition-all duration-200 hover:-translate-y-0.5 hover:border-white/14 hover:shadow-[0_0_24px_rgba(99,102,241,0.1)] ${accent}`}>
-      <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-zinc-400">{title}</p>
+      <div className="flex items-center gap-2">
+        <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-zinc-400">{title}</p>
+        {tooltip ? <InfoTooltip text={tooltip} ariaLabel={`${title}: what this means`} /> : null}
+      </div>
       <p className={`mt-2.5 break-words text-xl font-bold text-white sm:text-2xl xl:text-3xl ${mono ? "font-mono" : "font-heading"}`}>{value}</p>
       <p className="mt-1.5 text-[11px] text-zinc-500">{helper}</p>
     </div>
@@ -447,11 +458,13 @@ function SecondaryMetricCard({
   value,
   helper,
   tone = "neutral",
+  tooltip,
 }: {
   title: string
   value: string
   helper: string
   tone?: "positive" | "negative" | "neutral"
+  tooltip?: string
 }) {
   const toneClass =
     tone === "positive"
@@ -469,7 +482,10 @@ function SecondaryMetricCard({
 
   return (
     <div className={`rounded-2xl border p-4 shadow-[0_0_20px_rgba(99,102,241,0.04)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_0_24px_rgba(99,102,241,0.08)] ${toneClass}`}>
-      <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-zinc-400">{title}</p>
+      <div className="flex items-center gap-2">
+        <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-zinc-400">{title}</p>
+        {tooltip ? <InfoTooltip text={tooltip} ariaLabel={`${title}: what this means`} /> : null}
+      </div>
       <p className={`mt-1.5 font-mono text-2xl font-bold ${valueColor}`}>{value}</p>
       <p className="mt-1 text-[11px] text-zinc-500">{helper}</p>
     </div>
