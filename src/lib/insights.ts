@@ -15,14 +15,14 @@ export function buildGuidedInsightCards(
   tab: "long" | "shorts",
 ): GuidedInsightCard[] {
   const topVideo = bucket.topPerformers[0]
-  const contentLabel = tab === "long" ? "long videos" : "shorts"
+  const contentLabel = tab === "long" ? "long videos" : "Shorts"
   const trendDirection = bucket.momentumPercent >= 0 ? "up" : "down"
   const trendMagnitude = Math.abs(bucket.momentumPercent).toFixed(0)
   const breakoutRate = Math.round(bucket.breakoutRate)
 
   const pulseSummary =
     bucket.videos.length > 0
-      ? `Typical views are about ${Math.round(bucket.typicalViews).toLocaleString()} per ${contentLabel} upload (${bucket.confidence} confidence).`
+      ? `Typical views are about ${Math.round(bucket.typicalViews).toLocaleString()} per upload for ${contentLabel} (${bucket.confidence} confidence).`
       : "This channel needs more videos in this tab before trends can be trusted."
 
   const trendSummary =

@@ -40,6 +40,7 @@ export default function Home() {
 
   const activeBucket =
     data == null ? null : activeTab === "long" ? data.longForm : data.shorts
+  const topPerformer = activeBucket?.topPerformers[0]
 
   const guidedCards = useMemo(
     () => (activeBucket ? buildGuidedInsightCards(activeBucket, activeTab) : []),
@@ -290,11 +291,10 @@ export default function Home() {
                 helper="Likes + comments rate"
               />
               <KpiCard
-                title="Top Video"
-                value={activeBucket.topPerformers[0]?.title ?? "N/A"}
-                mono={false}
+                title="Top Video Views"
+                value={topPerformer ? formatViews(topPerformer.viewCount) : "N/A"}
                 accent={KPI_ACCENTS[2]}
-                helper="Best performer"
+                helper={topPerformer ? "Best performer (see title in Videos section)" : "Best performer"}
               />
               <KpiCard
                 title="Posting Rhythm"
@@ -443,6 +443,7 @@ function KpiCard({
   accent,
   helper,
   tooltip,
+  clampValue = false,
 }: {
   title: string
   value: string
@@ -450,6 +451,7 @@ function KpiCard({
   accent: string
   helper: string
   tooltip?: string
+  clampValue?: boolean
 }) {
   return (
     <div className={`group rounded-2xl border border-white/8 bg-[#0c0c0c] p-5 shadow-[0_0_20px_rgba(99,102,241,0.04)] transition-all duration-200 hover:-translate-y-0.5 hover:border-white/14 hover:shadow-[0_0_24px_rgba(99,102,241,0.1)] ${accent}`}>
@@ -457,7 +459,14 @@ function KpiCard({
         <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-zinc-400">{title}</p>
         {tooltip ? <InfoTooltip text={tooltip} ariaLabel={`${title}: what this means`} /> : null}
       </div>
-      <p className={`mt-2.5 break-words text-xl font-bold text-white sm:text-2xl xl:text-3xl ${mono ? "font-mono" : "font-heading"}`}>{value}</p>
+      <p
+        className={`mt-2.5 break-words font-bold text-white ${
+          mono ? "font-mono text-xl sm:text-2xl xl:text-3xl" : "font-heading text-xl sm:text-2xl"
+        } ${clampValue ? "line-clamp-4 leading-tight" : ""}`}
+        title={value}
+      >
+        {value}
+      </p>
       <p className="mt-1.5 text-[11px] text-zinc-500">{helper}</p>
     </div>
   )
