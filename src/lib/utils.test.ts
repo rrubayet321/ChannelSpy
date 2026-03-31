@@ -3,8 +3,10 @@ import { describe, expect, it } from "vitest"
 import {
   calculateMedian,
   calculatePercentile,
+  calcEstimatedEarnings,
   calcPerformanceScore,
   calcTrendDelta,
+  formatEarnings,
   formatViews,
   getConfidenceTier,
   getIqrBounds,
@@ -108,5 +110,26 @@ describe("robust analytics helpers", () => {
     expect(getConfidenceTier(3)).toBe("Low")
     expect(getConfidenceTier(10)).toBe("Medium")
     expect(getConfidenceTier(25)).toBe("High")
+  })
+})
+
+describe("estimated earnings", () => {
+  it("applies tiered CPM boundaries correctly", () => {
+    expect(calcEstimatedEarnings(9_999)).toBeCloseTo((9_999 / 1000) * 1.5, 6)
+    expect(calcEstimatedEarnings(10_000)).toBeCloseTo((10_000 / 1000) * 2.5, 6)
+    expect(calcEstimatedEarnings(100_000)).toBeCloseTo((100_000 / 1000) * 2.5, 6)
+    expect(calcEstimatedEarnings(100_001)).toBeCloseTo((100_001 / 1000) * 3.5, 6)
+    expect(calcEstimatedEarnings(500_000)).toBeCloseTo((500_000 / 1000) * 3.5, 6)
+    expect(calcEstimatedEarnings(500_001)).toBeCloseTo((500_001 / 1000) * 4.5, 6)
+    expect(calcEstimatedEarnings(1_000_000)).toBeCloseTo((1_000_000 / 1000) * 4.5, 6)
+    expect(calcEstimatedEarnings(1_000_001)).toBeCloseTo((1_000_001 / 1000) * 5.5, 6)
+  })
+
+  it("formats compact earnings strings", () => {
+    expect(formatEarnings(0)).toBe("$0")
+    expect(formatEarnings(950)).toBe("$950")
+    expect(formatEarnings(1_250)).toBe("$1.3K")
+    expect(formatEarnings(45_300)).toBe("$45.3K")
+    expect(formatEarnings(1_200_000)).toBe("$1.2M")
   })
 })

@@ -1,9 +1,16 @@
 import Image from "next/image"
-import { ArrowDownRight, ArrowUpRight, ExternalLink } from "lucide-react"
+import { ArrowDownRight, ArrowUpRight, DollarSign, ExternalLink } from "lucide-react"
 
 import { MetricBadge } from "@/components/channel/MetricBadge"
 import type { Video } from "@/lib/types"
-import { formatDate, formatDuration, formatEngagement, formatRelativeDate, formatViews } from "@/lib/utils"
+import {
+  formatDate,
+  formatDuration,
+  formatEarnings,
+  formatEngagement,
+  formatRelativeDate,
+  formatViews,
+} from "@/lib/utils"
 
 type VideoCardProps = {
   video: Video
@@ -87,6 +94,19 @@ export function VideoCard({ video, channelAvgViews, index }: VideoCardProps) {
           {trendUp ? <ArrowUpRight className="h-3.5 w-3.5" /> : <ArrowDownRight className="h-3.5 w-3.5" />}
           {trendLabel}
         </p>
+      </div>
+
+      <div className="group/earnings relative mx-3.5 mb-1.5 flex items-center justify-between rounded-md border border-white/6 bg-black/20 px-2.5 py-1.5">
+        <div className="flex items-center gap-1.5">
+          <DollarSign className="h-[14px] w-[14px] text-[#3ecf8e]" />
+          <span className="text-[10px] text-[#555]">Est. Earnings</span>
+        </div>
+        <span className="font-mono text-sm font-semibold text-[#3ecf8e]">
+          {formatEarnings(video.estimatedEarnings ?? 0)}
+        </span>
+        <span className="pointer-events-none absolute left-1/2 top-full z-30 mt-2 w-[240px] -translate-x-1/2 rounded-lg border border-[#3ecf8e]/25 bg-[#0b0b0b] px-2.5 py-2 text-[10px] leading-relaxed text-zinc-300 opacity-0 shadow-[0_12px_28px_rgba(0,0,0,0.55)] transition-opacity duration-150 group-hover/earnings:opacity-100">
+          Estimated based on public CPM averages. Actual earnings vary by niche and audience.
+        </span>
       </div>
 
       {/* Hover CTA */}

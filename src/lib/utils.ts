@@ -143,6 +143,33 @@ export function getConfidenceTier(sampleSize: number): "Low" | "Medium" | "High"
   return "Low"
 }
 
+export function calcEstimatedEarnings(viewCount: number): number {
+  if (!Number.isFinite(viewCount) || viewCount <= 0) return 0
+
+  let cpm = 1.5
+  if (viewCount >= 10_000 && viewCount <= 100_000) {
+    cpm = 2.5
+  } else if (viewCount > 100_000 && viewCount <= 500_000) {
+    cpm = 3.5
+  } else if (viewCount > 500_000 && viewCount <= 1_000_000) {
+    cpm = 4.5
+  } else if (viewCount > 1_000_000) {
+    cpm = 5.5
+  }
+
+  return (viewCount / 1000) * cpm
+}
+
+export function formatEarnings(amount: number): string {
+  if (!Number.isFinite(amount) || amount <= 0) return "$0"
+  if (amount < 1000) return `$${Math.round(amount)}`
+  if (amount < 1_000_000) return `$${compactNumber((amount / 1000).toFixed(1).replace(/\.0$/, ""))}K`
+  if (amount < 1_000_000_000) {
+    return `$${compactNumber((amount / 1_000_000).toFixed(1).replace(/\.0$/, ""))}M`
+  }
+  return `$${compactNumber((amount / 1_000_000_000).toFixed(1).replace(/\.0$/, ""))}B`
+}
+
 export function parseChannelUrl(input: string): ParsedChannelInput {
   const raw = input.trim()
   if (!raw) {
@@ -242,6 +269,7 @@ export function exportToCSV(
     "Engagement Rate %",
     "Performance Score (0-100)",
     "Views vs Channel Avg %",
+    "Estimated Earnings",
     "Performance Tier",
     "Published Date",
     "Days Since Published",
@@ -268,6 +296,7 @@ export function exportToCSV(
       Number(video.engagementRate.toFixed(2)),
       video.performanceScore,
       vsAvg,
+      formatEarnings(video.estimatedEarnings ?? 0),
       performanceTierLabel(video.performanceScore),
       formatDate(video.publishedAt),
       daysSince === "" ? "" : daysSince,

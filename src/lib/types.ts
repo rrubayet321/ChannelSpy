@@ -21,6 +21,7 @@ export interface Video {
   duration: string
   isShort: boolean
   isViewOutlier?: boolean
+  estimatedEarnings?: number
   viewCount: number
   likeCount: number
   commentCount: number
@@ -34,6 +35,8 @@ export interface AnalyticsBucket {
   avgViews: number
   typicalViews: number
   avgEngagement: number
+  totalEstimatedEarnings: number
+  avgEarningsPerVideo: number
   confidence: "Low" | "Medium" | "High"
   breakoutRate: number
   viewPercentiles: {

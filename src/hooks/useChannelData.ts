@@ -7,6 +7,7 @@ import {
   calculateAverage,
   calculateMedian,
   calculatePercentile,
+  calcEstimatedEarnings,
   calcEngagementRate,
   calcPerformanceScore,
   calcTrendDelta,
@@ -312,6 +313,8 @@ function buildAnalyticsBucket(
       avgViews: 0,
       typicalViews: 0,
       avgEngagement: 0,
+      totalEstimatedEarnings: 0,
+      avgEarningsPerVideo: 0,
       confidence: "Low",
       breakoutRate: 0,
       viewPercentiles: {
@@ -362,12 +365,14 @@ function buildAnalyticsBucket(
   const enrichedVideos: Video[] = videos.map((video) => {
     const performanceScore = calcPerformanceScore(video, robustBaselineViews, avgEngagement)
     const trendDelta = calcTrendDelta(video, robustBaselineViews)
+    const estimatedEarnings = calcEstimatedEarnings(video.viewCount)
     const isViewOutlier =
       iqrBounds != null &&
       (video.viewCount < iqrBounds.lower || video.viewCount > iqrBounds.upper)
     return {
       ...video,
       isViewOutlier,
+      estimatedEarnings,
       performanceScore,
       trendDelta,
     }
@@ -387,12 +392,20 @@ function buildAnalyticsBucket(
       ? enrichedVideos.filter((video) => video.viewCount >= breakoutThreshold).length
       : 0
   const breakoutRate = enrichedVideos.length > 0 ? (breakoutCount / enrichedVideos.length) * 100 : 0
+  const totalEstimatedEarnings = enrichedVideos.reduce(
+    (sum, video) => sum + (video.estimatedEarnings ?? 0),
+    0,
+  )
+  const avgEarningsPerVideo =
+    enrichedVideos.length > 0 ? totalEstimatedEarnings / enrichedVideos.length : 0
 
   return {
     videos: enrichedVideos,
     avgViews,
     typicalViews,
     avgEngagement,
+    totalEstimatedEarnings,
+    avgEarningsPerVideo,
     confidence: getConfidenceTier(enrichedVideos.length),
     breakoutRate,
     viewPercentiles,

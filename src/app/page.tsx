@@ -17,7 +17,7 @@ import { SaasLandingHero } from "@/components/ui/saas-landing-hero"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useChannelData } from "@/hooks/useChannelData"
 import { buildGuidedInsightCards, type SummaryCardAction } from "@/lib/insights"
-import { exportToCSV, formatViews } from "@/lib/utils"
+import { exportToCSV, formatEarnings, formatViews } from "@/lib/utils"
 import { AlertTriangle, ArrowLeft, Download, SearchX, ShieldAlert } from "lucide-react"
 import { LandingAttribution } from "@/components/landing/LandingAttribution"
 
@@ -26,6 +26,7 @@ const KPI_ACCENTS = [
   "border-l-2 border-l-[#818cf8]/60",
   "border-l-2 border-l-[#94a3b8]/60",
   "border-l-2 border-l-white/15",
+  "border-l-2 border-l-[#3ecf8e]",
 ] as const
 
 export default function Home() {
@@ -274,7 +275,7 @@ export default function Home() {
                   confidence={activeBucket.confidence}
                 />
 
-            <section id="overview-section" className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
+            <section id="overview-section" className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-5">
               <KpiCard
                 title="Typical Views"
                 value={formatViews(activeBucket.typicalViews)}
@@ -302,7 +303,16 @@ export default function Home() {
                 accent={KPI_ACCENTS[3]}
                 helper="Upload frequency"
               />
+              <KpiCard
+                title="Est. Channel Earnings"
+                value={formatEarnings(activeBucket.totalEstimatedEarnings)}
+                accent={KPI_ACCENTS[4]}
+                helper={`across ${activeBucket.videos.length} videos analyzed`}
+              />
             </section>
+            <p className="mt-2 text-[10px] italic text-zinc-500">
+              Estimates based on average CPM. Not actual earnings.
+            </p>
 
             <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4 sm:gap-4">
               <SecondaryMetricCard
@@ -532,8 +542,8 @@ function LoadingState() {
         </div>
       </div>
 
-      <section className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
-        {Array.from({ length: 4 }).map((_, i) => (
+      <section className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-5">
+        {Array.from({ length: 5 }).map((_, i) => (
           <Skeleton key={i} className="h-28 w-full rounded-2xl bg-[#1a1a1a]" />
         ))}
       </section>
