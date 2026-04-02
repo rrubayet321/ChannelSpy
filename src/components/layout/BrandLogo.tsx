@@ -1,6 +1,64 @@
 "use client"
 
+import Image from "next/image"
+import Link from "next/link"
+
 import { cn } from "@/lib/utils"
+
+const LOGO_SRC = "/channelspy-logo.png"
+const LOGO_WIDTH = 720
+const LOGO_HEIGHT = 144
+
+/** Shell + image treatment aligned with header/cards (white/8 borders, indigo ambient glow). */
+const logoShellClass =
+  "rounded-lg border border-white/[0.08] bg-black/50 px-3 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_0_28px_rgba(99,102,241,0.08)] transition-[border-color,box-shadow,background-color] duration-200"
+
+const logoShellHoverClass =
+  "hover:border-indigo-500/25 hover:bg-black/60 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_0_32px_rgba(99,102,241,0.14)]"
+
+const iconShellClass =
+  "rounded-md border border-white/[0.08] bg-black/50 p-0.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_0_20px_rgba(99,102,241,0.1)] transition-[border-color,box-shadow,background-color] duration-200"
+
+/** Nudge asset purple toward app indigo (#6366f1) and keep whites crisp on dark UI. */
+const logoImageClass =
+  "select-none brightness-[1.04] contrast-[1.03] saturate-[1.06] hue-rotate-[-6deg]"
+
+/**
+ * Locks vertical rhythm: inline images sit on the text baseline and pick up extra gap below.
+ * Fixed-height flex row keeps icon + wordmark optically centered in the shell.
+ */
+function LogoMark({
+  heightClass,
+  className,
+  maxWidthClass,
+}: {
+  heightClass: string
+  maxWidthClass?: string
+  className?: string
+}) {
+  return (
+    <span
+      className={cn(
+        "flex min-w-0 items-center justify-center leading-none",
+        heightClass,
+        maxWidthClass,
+      )}
+    >
+      <Image
+        src={LOGO_SRC}
+        alt="ChannelSpy"
+        width={LOGO_WIDTH}
+        height={LOGO_HEIGHT}
+        className={cn(
+          "block h-full w-auto max-h-full max-w-full object-contain object-left -translate-y-px",
+          logoImageClass,
+          className,
+        )}
+        priority
+      />
+    </span>
+  )
+}
 
 type BrandLogoVariant = "icon" | "wordmark" | "full"
 
@@ -12,80 +70,71 @@ type BrandLogoProps = {
   showLiveDot?: boolean
 }
 
-/**
- * BrandMark — A bold, vibrant gradient ring representing a "Spy Lens"
- * colored with the signature Aceternity vibrant palette (Purple -> Magenta -> Orange).
- */
-function BrandMark({ className }: { className?: string }) {
-  return (
-    <span className={cn("relative flex h-8 w-8 items-center justify-center", className)} aria-hidden="true">
-      {/* Outer vibrant lens ring */}
-      <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <linearGradient id="brand-gradient" x1="4" y1="4" x2="28" y2="28" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#4338ca" />
-            <stop offset="50%" stopColor="#6366f1" />
-            <stop offset="100%" stopColor="#a5b4fc" />
-          </linearGradient>
-          <linearGradient id="brand-gradient-glow" x1="4" y1="4" x2="28" y2="28" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#4338ca" stopOpacity="0.5" />
-            <stop offset="50%" stopColor="#6366f1" stopOpacity="0.5" />
-            <stop offset="100%" stopColor="#a5b4fc" stopOpacity="0.5" />
-          </linearGradient>
-        </defs>
-        
-        {/* Glow behind the ring */}
-        <circle cx="16" cy="16" r="11" stroke="url(#brand-gradient-glow)" strokeWidth="6" filter="blur(4px)" opacity="0.6"/>
-        
-        {/* Crisp core ring */}
-        <circle cx="16" cy="16" r="11" stroke="url(#brand-gradient)" strokeWidth="4" />
-        
-        {/* Inner 'recording/live' signal dot */}
-        <circle cx="16" cy="16" r="3" fill="#818cf8" />
-      </svg>
-    </span>
-  )
-}
-
-function BrandWordmark({
-  className,
-}: {
-  className?: string
-}) {
-  return (
-    <span className={cn("font-heading text-lg tracking-tight", className)}>
-      <span className="font-semibold text-white">Channel</span>
-      <span className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-indigo-300">Spy</span>
-    </span>
-  )
-}
-
 export function BrandLogo({
   variant = "full",
   className,
   iconClassName,
-  textClassName,
 }: BrandLogoProps) {
   if (variant === "icon") {
     return (
-      <span className={cn("inline-flex", className)} aria-label="ChannelSpy">
-        <BrandMark className={iconClassName} />
-      </span>
+      <Link
+        href="/"
+        className={cn(
+          "relative block h-8 w-8 shrink-0 overflow-hidden",
+          iconShellClass,
+          logoShellHoverClass,
+          className,
+        )}
+        aria-label="ChannelSpy home"
+      >
+        <Image
+          src={LOGO_SRC}
+          alt=""
+          width={LOGO_WIDTH}
+          height={LOGO_HEIGHT}
+          className={cn(
+            "block h-full w-full object-cover object-left leading-none",
+            logoImageClass,
+            iconClassName,
+          )}
+          priority
+        />
+      </Link>
     )
   }
 
   if (variant === "wordmark") {
     return (
-      <span className={cn("inline-flex items-center", className)} aria-label="ChannelSpy">
-        <BrandWordmark className={textClassName} />
-      </span>
+      <Link
+        href="/"
+        className={cn(
+          "inline-flex items-center justify-center leading-none",
+          logoShellClass,
+          logoShellHoverClass,
+          className,
+        )}
+        aria-label="ChannelSpy home"
+      >
+        <LogoMark heightClass="h-6" maxWidthClass="max-w-[min(100%,12rem)]" />
+      </Link>
     )
   }
 
   return (
-    <span className={cn("inline-flex items-center gap-2", className)} aria-label="ChannelSpy">
-      <BrandMark className={iconClassName} />
-      <BrandWordmark className={textClassName} />
-    </span>
+    <Link
+      href="/"
+      className={cn(
+        "inline-flex items-center justify-center leading-none",
+        logoShellClass,
+        logoShellHoverClass,
+        className,
+      )}
+      aria-label="ChannelSpy home"
+    >
+      <LogoMark
+        heightClass="h-[30px] sm:h-8"
+        maxWidthClass="max-w-[min(100vw-8rem,14rem)] sm:max-w-none"
+      />
+    </Link>
   )
 }
