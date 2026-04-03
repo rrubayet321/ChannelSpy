@@ -1,9 +1,10 @@
 "use client"
 
-import { FormEvent, useState } from "react"
+import { FormEvent, useRef, useState } from "react"
 import { Loader2, Search } from "lucide-react"
 
 import { AnimatedGlowingSearchBar } from "@/components/ui/animated-glowing-search-bar"
+import { trackEvent } from "@/lib/analytics"
 
 type SearchInputProps = {
   isLoading: boolean
@@ -22,8 +23,13 @@ export function SearchInput({
 }: SearchInputProps) {
   const [internalValue, setInternalValue] = useState("")
   const inputValue = value ?? internalValue
+  const hasStartedRef = useRef(false)
 
   const handleValueChange = (nextValue: string) => {
+    if (!hasStartedRef.current && nextValue.length > 0) {
+      hasStartedRef.current = true
+      trackEvent("input_started")
+    }
     if (onValueChange) {
       onValueChange(nextValue)
       return
@@ -35,6 +41,7 @@ export function SearchInput({
     event.preventDefault()
     const trimmed = inputValue.trim()
     if (!trimmed || isLoading) return
+    trackEvent("analyze_clicked", { input_length: trimmed.length })
     await onAnalyze(trimmed)
   }
 
@@ -55,10 +62,10 @@ export function SearchInput({
         <button
           type="submit"
           disabled={isLoading || inputValue.trim().length === 0}
-          className="analyze-cta-glow flex h-12 shrink-0 min-w-[120px] items-center justify-center gap-2 self-center rounded-xl border border-[#7c88ff] bg-[#6c78ff] px-5 text-sm font-semibold text-white transition-[background-color,transform,filter] hover:bg-[#7a86ff] hover:brightness-105 active:scale-[0.98] disabled:opacity-50"
+          className="analyze-cta-glow btn-clean flex h-12 w-full shrink-0 min-w-[120px] items-center justify-center gap-2 self-center rounded-xl border border-[#7c88ff] bg-[#6c78ff] px-5 text-sm font-semibold text-white hover:bg-[#7a86ff] active:scale-[0.98] disabled:opacity-50 sm:w-auto"
         >
-          {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
-          {isLoading ? "Scanning..." : "Analyze"}
+          {isLoading ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <Search className="h-4 w-4" aria-hidden />}
+          {isLoading ? "Analyzing…" : "Analyze"}
         </button>
       </div>
     </form>

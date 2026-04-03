@@ -11,6 +11,7 @@ import {
   formatRelativeDate,
   formatViews,
 } from "@/lib/utils"
+import { trackEvent } from "@/lib/analytics"
 
 type VideoCardProps = {
   video: Video
@@ -31,12 +32,12 @@ export function VideoCard({ video, channelAvgViews, index }: VideoCardProps) {
     video.performanceScore >= 70
       ? "border-t border-t-[#3ecf8e]/40"
       : video.performanceScore >= 50
-        ? "border-t border-t-white/15"
+        ? "border-t border-t-white/10"
         : ""
 
   return (
     <div
-      className={`video-card-enter group relative overflow-hidden rounded-2xl border border-white/6 bg-[#0a0a0a] shadow-[0_0_12px_rgba(99,102,241,0.03)] transition-all duration-200 hover:-translate-y-0.5 hover:border-white/12 hover:bg-[#0f0f0f] hover:shadow-[0_0_20px_rgba(99,102,241,0.08)] ${topBorderClass}`}
+      className={`video-card-enter group relative overflow-hidden rounded-2xl border border-white/[0.06] bg-[#0a0a0a] transition-all duration-200 hover:-translate-y-0.5 hover:border-white/10 hover:bg-[#0f0f0f] ${topBorderClass}`}
       style={{ animationDelay: `${index * 45}ms` }}
     >
       {/* Subtle inner highlight */}
@@ -114,6 +115,7 @@ export function VideoCard({ video, channelAvgViews, index }: VideoCardProps) {
         href={youtubeUrl}
         target="_blank"
         rel="noopener noreferrer"
+        onClick={() => trackEvent("outbound_click", { video_id: video.id })}
         className="pointer-events-none mx-3.5 mb-3.5 inline-flex -translate-y-1 items-center gap-1 text-[10px] text-white/40 opacity-0 transition-all duration-200 hover:text-white/70 group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100"
       >
         Watch on YouTube <ExternalLink className="h-3 w-3" />

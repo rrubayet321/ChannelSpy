@@ -16,7 +16,7 @@ export function ChannelHeader({ channel }: ChannelHeaderProps) {
   const shouldShowFallback = !avatarSrc || failedThumbnailUrl === avatarSrc
 
   return (
-    <section className="relative overflow-hidden rounded-2xl border border-white/6 bg-[#0a0a0a] p-6 shadow-[0_0_30px_rgba(99,102,241,0.05)] sm:p-7">
+    <section className="relative overflow-hidden rounded-2xl border border-white/[0.06] bg-[#0a0a0a] p-6 sm:p-7">
       {/* Subtle top edge highlight */}
       <div
         aria-hidden="true"
@@ -74,7 +74,7 @@ function getChannelInitials(title: string): string {
 
 function StatPill({ label, value }: { label: string; value: string }) {
   return (
-    <span className="inline-flex items-center gap-2 rounded-lg border border-white/7 bg-white/4 px-3.5 py-1.5 text-sm transition-colors hover:border-white/12 hover:bg-white/6">
+    <span className="inline-flex items-center gap-2 rounded-lg border border-white/[0.06] bg-white/[0.03] px-3.5 py-1.5 text-sm">
       <span className="text-white/40">{label}</span>
       <span className="font-mono font-semibold text-white">{value}</span>
     </span>

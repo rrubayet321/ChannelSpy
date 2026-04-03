@@ -1,14 +1,11 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
+import dynamic from "next/dynamic"
 import { Header } from "@/components/layout/Header"
 import { SearchInput } from "@/components/layout/SearchInput"
 import { ChannelHeader } from "@/components/channel/ChannelHeader"
 import { VideoGrid } from "@/components/channel/VideoGrid"
-import { ViewsChart } from "@/components/charts/ViewsChart"
-import { TopVideosChart } from "@/components/charts/TopVideosChart"
-import { EngagementChart } from "@/components/charts/EngagementChart"
-import { RecentWinnersChart } from "@/components/charts/RecentWinnersChart"
 import { GuidedInsightSummary } from "@/components/insights/GuidedInsightSummary"
 import { GridBackground } from "@/components/ui/GridBackground"
 import { InfoTooltip } from "@/components/ui/InfoTooltip"
@@ -18,16 +15,32 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { useChannelData } from "@/hooks/useChannelData"
 import { buildGuidedInsightCards, type SummaryCardAction } from "@/lib/insights"
 import { exportToCSV, formatEarnings, formatViews } from "@/lib/utils"
-import { AlertTriangle, ArrowLeft, Download, SearchX, ShieldAlert } from "lucide-react"
+import { trackEvent } from "@/lib/analytics"
+import { AlertTriangle, ArrowLeft, BarChart3, Download, FileDown, SearchX, ShieldAlert, Video } from "lucide-react"
 import { LandingAttribution } from "@/components/landing/LandingAttribution"
 
-const KPI_ACCENTS = [
-  "border-l-2 border-l-indigo-400/60",
-  "border-l-2 border-l-[#818cf8]/60",
-  "border-l-2 border-l-[#94a3b8]/60",
-  "border-l-2 border-l-white/15",
-  "border-l-2 border-l-[#3ecf8e]",
-] as const
+// Lazy-load chart components — defers ~140KB Recharts bundle until report view
+function ChartSkeleton() {
+  return <div className="h-72 w-full animate-pulse rounded-2xl bg-white/[0.03]" />
+}
+const ViewsChart = dynamic(
+  () => import("@/components/charts/ViewsChart").then((m) => ({ default: m.ViewsChart })),
+  { loading: () => <ChartSkeleton /> },
+)
+const EngagementChart = dynamic(
+  () => import("@/components/charts/EngagementChart").then((m) => ({ default: m.EngagementChart })),
+  { loading: () => <ChartSkeleton /> },
+)
+const TopVideosChart = dynamic(
+  () => import("@/components/charts/TopVideosChart").then((m) => ({ default: m.TopVideosChart })),
+  { loading: () => <ChartSkeleton /> },
+)
+const RecentWinnersChart = dynamic(
+  () => import("@/components/charts/RecentWinnersChart").then((m) => ({ default: m.RecentWinnersChart })),
+  { loading: () => <ChartSkeleton /> },
+)
+
+const KPI_ACCENTS = ["", "", "", "", ""] as const
 
 export default function Home() {
   const { data, error, errorCode, isLoading, analyzeChannel, clear } = useChannelData()
@@ -37,6 +50,11 @@ export default function Home() {
   const [channelInput, setChannelInput] = useState("")
   const [showIntro, setShowIntro] = useState(true)
   const exampleHandles = ["@MrBeast", "@mkbhd", "@chriswillx"] as const
+
+  // Fire landing_page_view once on mount
+  useEffect(() => {
+    trackEvent("landing_page_view")
+  }, [])
 
   const activeBucket =
     data == null ? null : activeTab === "long" ? data.longForm : data.shorts
@@ -51,7 +69,12 @@ export default function Home() {
     setReportMode(true)
     setShowDetailedSections(true)
     const analytics = await analyzeChannel(input)
-    if (!analytics) return
+    if (!analytics) {
+      trackEvent("analyze_failed")
+      return
+    }
+    trackEvent("analyze_success", { channel: input })
+    trackEvent("results_viewed")
     if (analytics.longForm.videos.length === 0 && analytics.shorts.videos.length > 0) {
       setActiveTab("shorts")
       return
@@ -109,12 +132,20 @@ export default function Home() {
           <section className="relative overflow-x-hidden bg-black">
             <GridBackground />
             <div className="relative z-10">
-              <SaasLandingHero className="intro-fade-up" onGetStarted={() => setShowIntro(false)} />
+              <SaasLandingHero
+                className="intro-fade-up"
+                onGetStarted={() => setShowIntro(false)}
+                onTrySample={(handle) => {
+                  setShowIntro(false)
+                  setChannelInput(handle)
+                  void handleAnalyze(handle)
+                }}
+              />
             </div>
             <LandingAttribution />
           </section>
         ) : (
-          <>
+          <div className="page-enter">
             {!reportMode && (
               <>
                 <div className="mx-auto mb-6 max-w-3xl">
@@ -127,40 +158,39 @@ export default function Home() {
                     Back to home
                   </button>
                 </div>
-                <section className="mx-auto mb-16 max-w-3xl text-center">
-                  <span className="mb-6 inline-flex items-center gap-2 rounded-full border border-indigo-500/20 bg-indigo-500/10 px-3.5 py-1.5 text-[10px] uppercase tracking-[0.2em] text-indigo-300/80">
-                    <span className="h-1.5 w-1.5 rounded-full bg-indigo-400" />
-                    YouTube Competitor Intelligence
-                  </span>
-
-                  <h1 className="font-heading text-5xl font-bold leading-[1.05] tracking-tight text-white md:text-6xl">
-                    Decode any channel.
-                    <br />
-                    <span className="text-white/60">Instantly.</span>
+                <section className="mx-auto mb-10 mt-4 max-w-3xl text-center">
+                  <h1 className="font-heading text-4xl font-bold leading-[1.08] tracking-tight text-white sm:text-5xl md:text-6xl">
+                    Analyze any YouTube channel
                   </h1>
 
                   <p className="mx-auto mt-5 max-w-lg text-base leading-relaxed text-zinc-300">
-                    Paste a competitor URL — get views, engagement, top videos, and posting patterns.
+                    Paste a URL, @handle, or channel ID to see their performance.
                   </p>
 
-                  <div className="mt-10 space-y-4">
+                  <div className="mt-8 space-y-3">
                     <SearchInput
                       isLoading={isLoading}
                       onAnalyze={handleAnalyze}
                       value={channelInput}
                       onValueChange={setChannelInput}
+                      placeholder="e.g. @MrBeast, youtube.com/c/MrBeast, or UCX6OQ3..."
                     />
+                    <p className="text-xs text-zinc-500">
+                      Supports YouTube channel URLs, @handles, and channel IDs
+                    </p>
                     <div className="flex flex-wrap items-center justify-center gap-2">
+                      <span className="text-[10px] uppercase tracking-wider text-zinc-600">Try:</span>
                       {exampleHandles.map((handle) => (
                         <button
                           key={handle}
                           type="button"
                           disabled={isLoading}
                           onClick={() => {
+                            trackEvent("sample_input_clicked", { handle })
                             setChannelInput(handle)
                             void handleAnalyze(handle)
                           }}
-                          className="rounded-full border border-white/10 px-3 py-1 text-xs text-zinc-400 transition-colors hover:border-indigo-500/30 hover:text-indigo-300 disabled:opacity-40"
+                          className="rounded-full border border-white/10 px-3 py-1.5 text-xs text-zinc-400 transition-colors hover:border-indigo-500/30 hover:text-indigo-300 disabled:opacity-40"
                         >
                           {handle}
                         </button>
@@ -169,18 +199,40 @@ export default function Home() {
                   </div>
                 </section>
 
-                <section className="mb-12 grid gap-3 sm:grid-cols-3">
-                  <FeatureCard label="Inputs" description="@handle, channel ID, or URL" />
-                  <FeatureCard label="Analytics" description="Views, engagement & momentum" />
-                  <FeatureCard label="Export" description="One-click CSV download" />
+                {/* Compact "What you get" section — Antarys-style icon badge cards */}
+                <section className="mx-auto mb-6 max-w-3xl">
+                  <div className="grid gap-3 sm:grid-cols-3">
+                    <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-5">
+                      <div className="mb-3 inline-flex h-8 w-8 items-center justify-center rounded-lg border border-white/[0.06] bg-white/[0.04]">
+                        <Video className="h-4 w-4 text-zinc-400" aria-hidden />
+                      </div>
+                      <p className="mb-1 text-sm font-medium text-white">Top Videos</p>
+                      <p className="text-sm leading-relaxed text-zinc-500">See which uploads get the most views and engagement</p>
+                    </div>
+                    <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-5">
+                      <div className="mb-3 inline-flex h-8 w-8 items-center justify-center rounded-lg border border-white/[0.06] bg-white/[0.04]">
+                        <BarChart3 className="h-4 w-4 text-zinc-400" aria-hidden />
+                      </div>
+                      <p className="mb-1 text-sm font-medium text-white">Performance</p>
+                      <p className="text-sm leading-relaxed text-zinc-500">Views, engagement, momentum trends, and scores</p>
+                    </div>
+                    <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-5">
+                      <div className="mb-3 inline-flex h-8 w-8 items-center justify-center rounded-lg border border-white/[0.06] bg-white/[0.04]">
+                        <FileDown className="h-4 w-4 text-zinc-400" aria-hidden />
+                      </div>
+                      <p className="mb-1 text-sm font-medium text-white">Export</p>
+                      <p className="text-sm leading-relaxed text-zinc-500">Download everything as a CSV with one click</p>
+                    </div>
+                  </div>
                 </section>
+
                 <LandingAttribution />
               </>
             )}
 
             {reportMode && (
               <section className="space-y-10">
-            <section className="sticky top-14 z-20 min-w-0 rounded-2xl border border-white/6 bg-[#080808]/90 p-3 shadow-[0_4px_24px_rgba(0,0,0,0.5)] backdrop-blur-md sm:p-4">
+            <section className="sticky top-14 z-20 min-w-0 rounded-2xl border border-white/[0.06] bg-[#050505]/90 p-3 backdrop-blur-md sm:p-4">
               <div className="flex min-w-0 flex-col gap-3">
                 <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div className="flex items-center gap-2">
@@ -400,12 +452,13 @@ export default function Home() {
                 </div>
                 <button
                   type="button"
-                  onClick={() =>
+                  onClick={() => {
+                    trackEvent("export_csv")
                     exportToCSV(activeBucket.videos, data.channel.title, activeTab, {
                       channelAvgViews: activeBucket.avgViews,
                       avgEngagementPercent: activeBucket.avgEngagement,
                     })
-                  }
+                  }}
                   disabled={activeBucket.videos.length === 0}
                   className="inline-flex items-center gap-1.5 rounded-lg border border-indigo-500/25 bg-indigo-500/10 px-3 py-1.5 text-xs font-medium text-indigo-300 transition-colors hover:bg-indigo-500/18 disabled:opacity-40"
                 >
@@ -420,7 +473,7 @@ export default function Home() {
             )}
               </section>
             )}
-          </>
+          </div>
         )}
       </main>
     </div>
@@ -429,7 +482,7 @@ export default function Home() {
 
 function FeatureCard({ label, description }: { label: string; description: string }) {
   return (
-    <div className="rounded-xl border border-white/8 bg-white/[0.03] px-4 py-3.5 shadow-[0_0_16px_rgba(99,102,241,0.03)] transition-all duration-200 hover:border-white/14 hover:shadow-[0_0_20px_rgba(99,102,241,0.08)]">
+    <div className="rounded-xl border border-white/8 bg-white/[0.03] px-4 py-3.5 shadow-[0_0_16px_rgba(99,102,241,0.03)]">
       <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.15em] text-indigo-400">{label}</p>
       <p className="text-sm text-zinc-400">{description}</p>
     </div>
@@ -454,7 +507,7 @@ function KpiCard({
   clampValue?: boolean
 }) {
   return (
-    <div className={`group rounded-2xl border border-white/8 bg-[#0c0c0c] p-5 shadow-[0_0_20px_rgba(99,102,241,0.04)] transition-all duration-200 hover:-translate-y-0.5 hover:border-white/14 hover:shadow-[0_0_24px_rgba(99,102,241,0.1)] ${accent}`}>
+    <div className={`rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5 ${accent}`}>
       <div className="flex items-center gap-2">
         <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-zinc-400">{title}</p>
         {tooltip ? <InfoTooltip text={tooltip} ariaLabel={`${title}: what this means`} /> : null}
@@ -500,7 +553,7 @@ function SecondaryMetricCard({
         : "text-white"
 
   return (
-    <div className={`rounded-2xl border p-4 shadow-[0_0_20px_rgba(99,102,241,0.04)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_0_24px_rgba(99,102,241,0.08)] ${toneClass}`}>
+    <div className={`rounded-2xl border p-4 ${toneClass}`}>
       <div className="flex items-center gap-2">
         <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-zinc-400">{title}</p>
         {tooltip ? <InfoTooltip text={tooltip} ariaLabel={`${title}: what this means`} /> : null}
