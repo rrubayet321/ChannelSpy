@@ -15,7 +15,7 @@
 
 It's designed to stay **easy to understand**: key metrics include short "What this means" tooltips, baselines avoid being thrown off by one viral outlier, and estimated earnings give a quick revenue signal per video and per channel.
 
-Built as a full-stack project to explore **App Router**, **server-only secrets**, **Recharts**, and **quota-conscious** YouTube Data API v3 usage.
+Built as a full-stack project to explore **App Router**, **server-only secrets**, **Recharts**, **Core Web Vitals optimization**, and **quota-conscious** YouTube Data API v3 usage. Features a premium, minimalist **Antarys/YC-inspired dark mode UI** with robust full-funnel analytics.
 
 ---
 
@@ -89,6 +89,7 @@ flowchart TD
 | UI | **React 19**, **Tailwind CSS v4** | Fast iteration, dark SaaS layout |
 | Charts | **Recharts** | Composable charts for trends and comparisons |
 | Data | **YouTube Data API v3** | Official channel, playlist, and video statistics |
+| Analytics | **GA4 & Microsoft Clarity** | Full funnel tracking and user behavior insights |
 | Quality | **Vitest**, **ESLint** | Fast unit tests for core `lib/utils` without a browser |
 | Styling tokens | **shadcn/tailwind.css** | Consistent design variables |
 
@@ -111,6 +112,9 @@ flowchart TD
 | **Plain-language UX** | Key metrics have short "What this means" `InfoTooltip` hover explanations; technical jargon replaced with everyday words. |
 | **CSV export** | UTF-8 BOM for Excel, metadata block, rows sorted by score with human column names including **Estimated Earnings**. |
 | **Structured errors** | API returns typed codes (`NOT_FOUND`, `QUOTA_EXCEEDED`, `INVALID_INPUT`, ...) so the UI shows specific recovery copy. |
+| **Core Web Vitals** | Defers ~140KB of JS payload using Next.js `next/dynamic` to lazy-load all Recharts components until the user hits the report view. Adds `preconnect` and `dns-prefetch` hints for external assets. |
+| **Comprehensive Analytics** | Full funnel instrumentation (11 distinct typed events e.g., `input_started`, `analyze_success`) mapped into a seamless, session-deduplicated pipeline bridging GA4 and Clarity. |
+| **Minimalist Aesthetic** | Employs an Antarys/YC startup-inspired design system: high-contrast typography (DM Serif Display + Inter), lightweight pure CSS animated ambient gradient orbs, and native SVG wordmarks without the bloat. All mobile tap-targets are >44px and dead clicks are fully resolved. |
 
 ---
 
@@ -192,4 +196,4 @@ npm run test
 
 ---
 
-Built by **[Rubayet Hassan](https://github.com/rrubayet321)** · [ChannelSpy on GitHub](https://github.com/rrubayet321/ChannelSpy)
+&copy; 2026 Rubayet Hassan. All rights reserved. &middot; [⭐ Star this repository](https://github.com/rrubayet321/ChannelSpy)
