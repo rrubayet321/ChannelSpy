@@ -107,7 +107,7 @@ export function SaasLandingHero({ onGetStarted, onTrySample, className }: SaasLa
           </p>
 
           {/* Headline — DM Serif Display, center-aligned */}
-          <h1 className="hero-stagger-2 font-[family-name:var(--font-display-face)] text-[2.6rem] font-normal leading-[1.1] tracking-[-0.01em] text-white sm:text-[3.5rem] lg:text-[4.75rem]">
+          <h1 className="hero-stagger-2 font-[family-name:var(--font-display-face)] text-[2rem] font-normal leading-[1.1] tracking-[-0.01em] text-white sm:text-[3.5rem] lg:text-[4.75rem]">
             Discover what&apos;s working
             <span className="block italic text-white/60">
               for any YouTube channel.
@@ -168,7 +168,7 @@ export function SaasLandingHero({ onGetStarted, onTrySample, className }: SaasLa
           </div>
 
           {/* Trust microcopy */}
-          <p className="hero-stagger-4 mt-5 text-xs text-zinc-600">
+          <p className="hero-stagger-4 mt-5 px-4 text-center text-xs text-zinc-600 sm:px-0">
             Free &middot; No signup required &middot; Results in ~15 seconds &middot; Supports URLs, @handles &amp; channel IDs
           </p>
         </div>

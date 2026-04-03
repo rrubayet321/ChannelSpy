@@ -8,11 +8,11 @@ import { ChevronDown, Mail, Star } from "lucide-react"
 function Dropdown({
   trigger,
   children,
-  align = "right",
+  mobileFullWidth = true,
 }: {
   trigger: React.ReactNode
   children: React.ReactNode
-  align?: "left" | "right"
+  mobileFullWidth?: boolean
 }) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
@@ -39,9 +39,13 @@ function Dropdown({
         {trigger}
       </button>
 
-      {/* Panel — always mounted, animated via CSS */}
+      {/* Mobile: fixed full-width below header. Desktop: absolute right-aligned */}
       <div
-        className={`absolute ${align === "right" ? "right-0" : "left-0"} top-full z-[60] mt-2 transition-all duration-300 ease-out ${
+        className={`z-[60] transition-all duration-300 ease-out ${
+          mobileFullWidth
+            ? "fixed inset-x-3 top-[calc(3.5rem+0.5rem)] sm:absolute sm:inset-x-auto sm:right-0 sm:top-full sm:mt-2"
+            : "absolute right-0 top-full mt-2"
+        } ${
           open
             ? "pointer-events-auto translate-y-0 scale-100 opacity-100"
             : "pointer-events-none -translate-y-2 scale-95 opacity-0"
@@ -65,13 +69,13 @@ export function Header() {
         <Dropdown
           trigger={
             <span className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs text-zinc-400 transition-colors hover:bg-white/[0.04] hover:text-zinc-200">
-              FAQ
+              <span className="hidden sm:inline">FAQ</span>
               <ChevronDown className="h-3.5 w-3.5 shrink-0 opacity-60" aria-hidden />
             </span>
           }
         >
           <div
-            className="w-[min(100vw-2rem,22rem)] max-h-[min(70vh,28rem)] overflow-y-auto rounded-xl border border-white/[0.1] bg-[#0a0a0a]/95 p-3 shadow-[0_16px_48px_rgba(0,0,0,0.65)] backdrop-blur-xl"
+            className="max-h-[min(70vh,28rem)] overflow-y-auto rounded-xl border border-white/[0.1] bg-[#0a0a0a]/95 p-3 shadow-[0_16px_48px_rgba(0,0,0,0.65)] backdrop-blur-xl sm:w-[22rem]"
             role="region"
             aria-label="Frequently asked questions"
           >
@@ -98,7 +102,7 @@ export function Header() {
           </div>
         </Dropdown>
 
-        {/* Star link */}
+        {/* Star link — hidden on mobile */}
         <a
           href="https://github.com/rrubayet321/ChannelSpy"
           target="_blank"
@@ -115,11 +119,11 @@ export function Header() {
           trigger={
             <span className="flex items-center gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-1.5 text-xs text-zinc-400 transition-all duration-200 hover:border-indigo-500/30 hover:bg-indigo-500/10 hover:text-indigo-300 hover:shadow-[0_0_12px_rgba(99,102,241,0.15)]">
               <Mail className="h-3.5 w-3.5" aria-hidden />
-              Contact
+              <span className="hidden sm:inline">Contact</span>
             </span>
           }
         >
-          <div className="w-64 rounded-xl border border-white/[0.1] bg-[#0a0a0a]/95 p-4 shadow-[0_16px_48px_rgba(0,0,0,0.65)] backdrop-blur-xl">
+          <div className="rounded-xl border border-white/[0.1] bg-[#0a0a0a]/95 p-4 shadow-[0_16px_48px_rgba(0,0,0,0.65)] backdrop-blur-xl sm:w-64">
             <p className="text-xs leading-relaxed text-zinc-400">
               For any bug fixes, feedbacks and queries contact me
             </p>
@@ -133,8 +137,9 @@ export function Header() {
           </div>
         </Dropdown>
 
-        <span className="h-3.5 w-px bg-white/10 sm:block hidden" />
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.03] px-2.5 py-1 text-[10px] font-medium uppercase tracking-wider text-zinc-600">
+        <span className="hidden h-3.5 w-px bg-white/10 sm:block" />
+        {/* Beta badge — desktop only */}
+        <span className="hidden items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.03] px-2.5 py-1 text-[10px] font-medium uppercase tracking-wider text-zinc-600 sm:inline-flex">
           <span className="h-1 w-1 rounded-full bg-zinc-500 opacity-75" />
           Beta
         </span>
