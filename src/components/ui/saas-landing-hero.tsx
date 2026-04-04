@@ -18,10 +18,10 @@ export function SaasLandingHero({ onGetStarted, onTrySample, className }: SaasLa
         className,
       )}
     >
-      {/* Film grain texture overlay */}
+      {/* Film grain texture overlay — desktop only (mobile doesn't benefit) */}
       <div
         aria-hidden="true"
-        className="hero-grain pointer-events-none absolute inset-0 z-20 opacity-[0.018]"
+        className="hero-grain pointer-events-none absolute inset-0 z-20 hidden opacity-[0.018] sm:block"
       />
 
       {/* Animated purple gradient orbs */}
@@ -47,10 +47,17 @@ export function SaasLandingHero({ onGetStarted, onTrySample, className }: SaasLa
             50%  { transform: translate(3%, 5%) scale(1.1); opacity: 0.8; }
             100% { transform: translate(0%, 0%) scale(1); opacity: 0.6; }
           }
+          /* Reduce blur cost on mobile */
+          @media (max-width: 639px) {
+            .orb-1 { filter: blur(40px) !important; }
+            .orb-2 { filter: blur(50px) !important; }
+            .orb-3 { filter: blur(35px) !important; }
+          }
         `}</style>
 
         {/* Top-right — large indigo orb */}
         <div
+          className="orb-1"
           style={{
             position: "absolute",
             top: "-15%",
@@ -61,11 +68,13 @@ export function SaasLandingHero({ onGetStarted, onTrySample, className }: SaasLa
             background: "radial-gradient(circle at center, rgba(99,102,241,0.45) 0%, rgba(79,70,229,0.20) 45%, transparent 72%)",
             filter: "blur(72px)",
             animation: "orb-drift-1 18s ease-in-out infinite",
+            willChange: "transform, opacity",
           }}
         />
 
         {/* Bottom-left — deep violet orb */}
         <div
+          className="orb-2"
           style={{
             position: "absolute",
             bottom: "-20%",
@@ -76,11 +85,13 @@ export function SaasLandingHero({ onGetStarted, onTrySample, className }: SaasLa
             background: "radial-gradient(circle at center, rgba(109,40,217,0.40) 0%, rgba(76,29,149,0.18) 50%, transparent 72%)",
             filter: "blur(90px)",
             animation: "orb-drift-2 24s ease-in-out infinite",
+            willChange: "transform, opacity",
           }}
         />
 
         {/* Center-bottom — small accent orb */}
         <div
+          className="orb-3"
           style={{
             position: "absolute",
             bottom: "-5%",
@@ -92,6 +103,7 @@ export function SaasLandingHero({ onGetStarted, onTrySample, className }: SaasLa
             background: "radial-gradient(circle at center, rgba(139,92,246,0.28) 0%, transparent 70%)",
             filter: "blur(60px)",
             animation: "orb-drift-3 30s ease-in-out infinite",
+            willChange: "transform, opacity",
           }}
         />
       </div>

@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState, startTransition } from "react"
 import dynamic from "next/dynamic"
 import { Header } from "@/components/layout/Header"
 import { SearchInput } from "@/components/layout/SearchInput"
@@ -134,9 +134,9 @@ export default function Home() {
             <div className="relative z-10">
               <SaasLandingHero
                 className="intro-fade-up"
-                onGetStarted={() => setShowIntro(false)}
+                onGetStarted={() => startTransition(() => setShowIntro(false))}
                 onTrySample={(handle) => {
-                  setShowIntro(false)
+                  startTransition(() => setShowIntro(false))
                   setChannelInput(handle)
                   void handleAnalyze(handle)
                 }}

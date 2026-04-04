@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useMemo, useRef, useState } from "react"
+import { useCallback, useMemo, useRef, useState, startTransition } from "react"
 
 import type { AnalyticsBucket, Channel, ChannelAnalytics, ParsedChannelInput, Video } from "@/lib/types"
 import {
@@ -174,11 +174,13 @@ export function useChannelData(): UseChannelDataResult {
 
         analyticsCache.set(cacheKey, analytics)
         if (isStale()) return null
-        setState({
-          data: analytics,
-          isLoading: false,
-          error: null,
-          errorCode: null,
+        startTransition(() => {
+          setState({
+            data: analytics,
+            isLoading: false,
+            error: null,
+            errorCode: null,
+          })
         })
         return analytics
       } catch (error) {
