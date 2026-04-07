@@ -130,8 +130,7 @@ export function useChannelData(): UseChannelDataResult {
 
       try {
         const channelResponse = await fetchChannel(parsedInput)
-        const allVideos = await fetchPlaylistVideos(channelResponse.uploadsPlaylistId)
-        const statsById = await fetchStatsMap(allVideos.map((video) => video.id))
+        const { allVideos, statsById } = await fetchVideosAndStats(channelResponse.uploadsPlaylistId)
 
         if (isStale()) return null
 
@@ -231,9 +230,13 @@ async function fetchChannel(parsedInput: ParsedChannelInput): Promise<Channel> {
   return payload.channel
 }
 
-async function fetchPlaylistVideos(playlistId: string): Promise<VideosActionResponse["videos"]> {
+async function fetchVideosAndStats(playlistId: string): Promise<{
+  allVideos: VideosActionResponse["videos"]
+  statsById: Map<string, StatsActionResponse["stats"][number]>
+}> {
   const allVideos: VideosActionResponse["videos"] = []
   let nextPageToken: string | null = null
+  const statsPromises: Promise<StatsActionResponse["stats"]>[] = []
 
   while (allVideos.length < MAX_VIDEOS_TO_FETCH) {
     const params = new URLSearchParams({
@@ -257,48 +260,58 @@ async function fetchPlaylistVideos(playlistId: string): Promise<VideosActionResp
       throw new ChannelDataError("Videos response is malformed.", "UNKNOWN")
     }
 
-    allVideos.push(...payload.videos)
-    nextPageToken = payload.nextPageToken
+    const fetchedVideos = payload.videos
+    allVideos.push(...fetchedVideos)
 
+    // Trigger stats fetch immediately for this page's videos concurrently
+    const videoIds = fetchedVideos.map((v) => v.id).filter(Boolean)
+    if (videoIds.length > 0) {
+      for (let i = 0; i < videoIds.length; i += 50) {
+        const chunk = videoIds.slice(i, i + 50)
+        const statsParams = new URLSearchParams({
+          action: "stats",
+          ids: chunk.join(","),
+        })
+
+        const statsPromise = fetch(`${YOUTUBE_API_ROUTE}?${statsParams.toString()}`, {
+          method: "GET",
+          cache: "no-store",
+        }).then(async (res) => {
+          const statsPayload = (await res.json()) as StatsActionResponse | ApiErrorResponse
+          if (!res.ok) {
+            throw toChannelDataError(statsPayload, "Failed to fetch video stats.")
+          }
+          if (!("stats" in statsPayload) || !Array.isArray(statsPayload.stats)) {
+            throw new ChannelDataError("Stats response is malformed.", "UNKNOWN")
+          }
+          return statsPayload.stats
+        })
+
+        statsPromises.push(statsPromise)
+      }
+    }
+
+    nextPageToken = payload.nextPageToken
     if (!nextPageToken) {
       break
     }
   }
 
-  return allVideos.slice(0, MAX_VIDEOS_TO_FETCH)
-}
+  const slicedVideos = allVideos.slice(0, MAX_VIDEOS_TO_FETCH)
+  const allowedIds = new Set(slicedVideos.map((v) => v.id))
 
-async function fetchStatsMap(videoIds: string[]): Promise<Map<string, StatsActionResponse["stats"][number]>> {
-  const statsMap = new Map<string, StatsActionResponse["stats"][number]>()
-  const uniqueIds = Array.from(new Set(videoIds.filter(Boolean)))
+  const statsArrays = await Promise.all(statsPromises)
+  const statsById = new Map<string, StatsActionResponse["stats"][number]>()
 
-  for (let i = 0; i < uniqueIds.length; i += 50) {
-    const chunk = uniqueIds.slice(i, i + 50)
-    if (chunk.length === 0) continue
-
-    const params = new URLSearchParams({
-      action: "stats",
-      ids: chunk.join(","),
-    })
-    const response = await fetch(`${YOUTUBE_API_ROUTE}?${params.toString()}`, {
-      method: "GET",
-      cache: "no-store",
-    })
-    const payload = (await response.json()) as StatsActionResponse | ApiErrorResponse
-
-    if (!response.ok) {
-      throw toChannelDataError(payload, "Failed to fetch video stats.")
-    }
-    if (!("stats" in payload) || !Array.isArray(payload.stats)) {
-      throw new ChannelDataError("Stats response is malformed.", "UNKNOWN")
-    }
-
-    for (const video of payload.stats) {
-      statsMap.set(video.id, video)
+  for (const statsChunk of statsArrays) {
+    for (const stats of statsChunk) {
+      if (allowedIds.has(stats.id)) {
+        statsById.set(stats.id, stats)
+      }
     }
   }
 
-  return statsMap
+  return { allVideos: slicedVideos, statsById }
 }
 
 function buildAnalyticsBucket(
