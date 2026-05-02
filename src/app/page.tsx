@@ -672,15 +672,6 @@ export default function Home() {
   )
 }
 
-function FeatureCard({ label, description }: { label: string; description: string }) {
-  return (
-    <div className="rounded-xl border border-white/8 bg-white/[0.03] px-4 py-3.5 shadow-[0_0_16px_rgba(99,102,241,0.03)]">
-      <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.15em] text-indigo-400">{label}</p>
-      <p className="text-sm text-zinc-400">{description}</p>
-    </div>
-  )
-}
-
 function KpiCard({
   title,
   value,

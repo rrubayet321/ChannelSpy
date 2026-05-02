@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useState } from "react"
 import type { Channel } from "@/lib/types"
 
 const STORAGE_KEY = "channelspy_recent"
@@ -30,6 +30,8 @@ function toRecentChannel(channel: Channel, input: string): RecentChannel {
 }
 
 function readFromStorage(): RecentChannel[] {
+  // localStorage is unavailable during SSR; return empty array as initial server value.
+  if (typeof window === "undefined") return []
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return []
@@ -49,11 +51,9 @@ function writeToStorage(channels: RecentChannel[]): void {
 }
 
 export function useRecentChannels() {
-  const [recents, setRecents] = useState<RecentChannel[]>([])
-
-  useEffect(() => {
-    setRecents(readFromStorage())
-  }, [])
+  // Lazy initializer: reads from localStorage once on the client after mount.
+  // Passing the function reference (not calling it) avoids setState-in-effect.
+  const [recents, setRecents] = useState<RecentChannel[]>(readFromStorage)
 
   const addRecent = useCallback((channel: Channel, input: string) => {
     setRecents((prev) => {

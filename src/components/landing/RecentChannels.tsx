@@ -1,7 +1,7 @@
 "use client"
 
 import Image from "next/image"
-import { Clock, X } from "lucide-react"
+import { Clock } from "lucide-react"
 import type { RecentChannel } from "@/hooks/useRecentChannels"
 import { formatViews } from "@/lib/utils"
 
