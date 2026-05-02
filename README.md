@@ -16,7 +16,7 @@
 
 It's designed to stay **easy to understand**: key metrics include short "What this means" tooltips, baselines avoid being thrown off by one viral outlier, and estimated earnings give a quick revenue signal per video and per channel.
 
-Built as a full-stack project to explore **App Router**, **server-only secrets**, **Recharts**, **Core Web Vitals optimization**, and **quota-conscious** YouTube Data API v3 usage. Features a premium, minimalist **Antarys/YC-inspired dark mode UI** with robust full-funnel analytics.
+Built as a full-stack project to explore **App Router**, **server-only secrets**, **Recharts**, **Core Web Vitals optimization**, and **quota-conscious** YouTube Data API v3 usage. 
 
 ---
 
