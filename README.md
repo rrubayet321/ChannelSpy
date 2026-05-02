@@ -6,7 +6,8 @@
 ![Tailwind](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?logo=tailwindcss&logoColor=white)
 ![Recharts](https://img.shields.io/badge/Recharts-3-22C55E)
 ![YouTube](https://img.shields.io/badge/API-YouTube_Data_v3-FF0000?logo=youtube&logoColor=white)
-![Tests](https://img.shields.io/badge/Tests-17%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/Tests-48%20passing-brightgreen)
+![CI](https://img.shields.io/github/actions/workflow/status/rrubayet321/ChannelSpy/ci.yml?label=CI&logo=githubactions&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-lightgrey)
 
 > You have ten competitor tabs open and a spreadsheet that is already wrong.
@@ -172,11 +173,11 @@ Single route: **`GET /api/youtube`** — all actions via query parameters.
 
 ## Tests
 
-Unit tests mock **nothing** for YouTube — they target **pure helpers** (`parseChannelUrl`, `formatViews`, `calcPerformanceScore`, `calcEstimatedEarnings`, ...) so CI stays fast and credential-free.
+Unit tests mock **nothing** for YouTube — they target **pure helpers** (`parseChannelUrl`, `formatViews`, `calcPerformanceScore`, `calcEstimatedEarnings`, `escapeCsv`, input validators, ...) so CI stays fast and credential-free.
 
 ```bash
-npm run test
-# 17 tests, sub-second
+npm test
+# 48 tests across 2 files, sub-second
 ```
 
 ---

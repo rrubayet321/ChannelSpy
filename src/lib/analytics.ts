@@ -27,6 +27,7 @@ export type AnalyticsEvent =
   | "results_viewed"       // Report opened with real data
   | "outbound_click"       // YouTube video link clicked in results
   | "export_csv"           // Export CSV button clicked
+  | "compare_analyzed"     // Second channel compared
 
 // ─── Session-scoped deduplication ─────────────────────────────────────────
 

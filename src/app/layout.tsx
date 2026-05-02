@@ -49,17 +49,17 @@ export const metadata: Metadata = {
     apple: "/favicon.svg",
   },
   openGraph: {
-    title: "ChannelSpy — YouTube Competitor Intelligence",
+    title: "ChannelSpy — Free YouTube Channel Analyzer",
     description:
-      "Analyze any YouTube channel instantly. Views, engagement, trends, and performance scores.",
+      "Paste any YouTube channel URL or @handle. Get views, engagement, trends, performance scores, and CSV export — free, no signup.",
     type: "website",
     images: ["/brandmark.svg"],
   },
   twitter: {
     card: "summary",
-    title: "ChannelSpy — YouTube Competitor Intelligence",
+    title: "ChannelSpy — Free YouTube Channel Analyzer",
     description:
-      "Analyze any YouTube channel instantly. Views, engagement, trends, and performance scores.",
+      "Paste any YouTube channel URL or @handle. Get views, engagement, trends, performance scores, and CSV export — free, no signup.",
     images: ["/brandmark.svg"],
   },
 };

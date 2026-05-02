@@ -1,4 +1,11 @@
 import { NextRequest, NextResponse } from "next/server"
+import {
+  isValidChannelId,
+  isValidHandle,
+  isValidPageToken,
+  isValidPlaylistId,
+  isValidVideoId,
+} from "@/lib/validators"
 
 type ApiErrorCode =
   | "INVALID_INPUT"
@@ -6,6 +13,7 @@ type ApiErrorCode =
   | "QUOTA_EXCEEDED"
   | "UPSTREAM_ERROR"
   | "SERVER_MISCONFIGURED"
+  | "RATE_LIMITED"
 
 type ApiErrorResponse = {
   error: {
@@ -35,7 +43,40 @@ type YouTubeData = {
 
 const YOUTUBE_API_BASE = "https://www.googleapis.com/youtube/v3"
 
+// ─── In-memory rate limiter ────────────────────────────────────────────────
+// Sliding window: max 10 requests per 60 s per IP. Resets on cold start.
+// Replace with Redis/Upstash for multi-instance production deployments.
+const RATE_LIMIT_MAX = 10
+const RATE_LIMIT_WINDOW_MS = 60_000
+const rateLimitStore = new Map<string, { count: number; windowStart: number }>()
+
+function getClientIp(request: NextRequest): string {
+  const forwarded = request.headers.get("x-forwarded-for")
+  return (forwarded ? forwarded.split(",")[0] : "127.0.0.1").trim()
+}
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now()
+  const record = rateLimitStore.get(ip)
+  if (!record || now - record.windowStart > RATE_LIMIT_WINDOW_MS) {
+    rateLimitStore.set(ip, { count: 1, windowStart: now })
+    return false
+  }
+  if (record.count >= RATE_LIMIT_MAX) return true
+  record.count++
+  return false
+}
+
 export async function GET(request: NextRequest) {
+  const ip = getClientIp(request)
+  if (isRateLimited(ip)) {
+    return errorResponse(
+      429,
+      "RATE_LIMITED",
+      "Too many requests. Please wait a moment before trying again.",
+    )
+  }
+
   const apiKey = process.env.YOUTUBE_API_KEY
   if (!apiKey) {
     return errorResponse(
@@ -74,6 +115,14 @@ async function handleChannelAction(params: URLSearchParams, apiKey: string) {
       "INVALID_INPUT",
       "Provide one of: handle or channelId for action=channel.",
     )
+  }
+
+  if (handle && !isValidHandle(handle)) {
+    return errorResponse(400, "INVALID_INPUT", "Invalid channel handle format.")
+  }
+
+  if (channelId && !isValidChannelId(channelId)) {
+    return errorResponse(400, "INVALID_INPUT", "Invalid channel ID format — must start with UC.")
   }
 
   const query = new URLSearchParams({
@@ -144,6 +193,14 @@ async function handleVideosAction(params: URLSearchParams, apiKey: string) {
     )
   }
 
+  if (!isValidPlaylistId(playlistId)) {
+    return errorResponse(400, "INVALID_INPUT", "Invalid playlist ID format.")
+  }
+
+  if (pageToken && !isValidPageToken(pageToken)) {
+    return errorResponse(400, "INVALID_INPUT", "Invalid page token.")
+  }
+
   const maxResults = clampInt(maxResultsRaw, 1, 50, 50)
   const query = new URLSearchParams({
     part: "snippet,contentDetails",
@@ -195,7 +252,7 @@ async function handleStatsAction(params: URLSearchParams, apiKey: string) {
   const ids = rawIds
     .split(",")
     .map((value) => value.trim())
-    .filter(Boolean)
+    .filter((id) => isValidVideoId(id))
     .slice(0, 50)
 
   if (ids.length === 0) {

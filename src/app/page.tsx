@@ -1,22 +1,27 @@
 "use client"
 
-import { useEffect, useMemo, useState, startTransition } from "react"
+import { useEffect, useMemo, useRef, useState, startTransition, Suspense } from "react"
 import dynamic from "next/dynamic"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Header } from "@/components/layout/Header"
 import { SearchInput } from "@/components/layout/SearchInput"
 import { ChannelHeader } from "@/components/channel/ChannelHeader"
+import { CompareChannels } from "@/components/channel/CompareChannels"
 import { VideoGrid } from "@/components/channel/VideoGrid"
 import { GuidedInsightSummary } from "@/components/insights/GuidedInsightSummary"
+import { RecentChannels } from "@/components/landing/RecentChannels"
 import { GridBackground } from "@/components/ui/GridBackground"
 import { InfoTooltip } from "@/components/ui/InfoTooltip"
 import { OrbitLoader } from "@/components/ui/OrbitLoader"
 import { SaasLandingHero } from "@/components/ui/saas-landing-hero"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useChannelData } from "@/hooks/useChannelData"
+import { useRecentChannels } from "@/hooks/useRecentChannels"
 import { buildGuidedInsightCards, type SummaryCardAction } from "@/lib/insights"
-import { exportToCSV, formatEarnings, formatViews } from "@/lib/utils"
+import { getBestDaySummary } from "@/lib/cadence"
+import { exportToCSV, formatEarnings, formatViews, parseChannelUrl } from "@/lib/utils"
 import { trackEvent } from "@/lib/analytics"
-import { AlertTriangle, ArrowLeft, BarChart3, Download, FileDown, SearchX, ShieldAlert, Video } from "lucide-react"
+import { AlertTriangle, ArrowLeft, BarChart3, Check, Download, FileDown, GitCompareArrows, Link2, SearchX, ShieldAlert, Video } from "lucide-react"
 import { LandingAttribution } from "@/components/landing/LandingAttribution"
 
 // Lazy-load chart components — defers ~140KB Recharts bundle until report view
@@ -42,19 +47,59 @@ const RecentWinnersChart = dynamic(
 
 const KPI_ACCENTS = ["", "", "", "", ""] as const
 
-export default function Home() {
+function HomeContent() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const { data, error, errorCode, isLoading, analyzeChannel, clear } = useChannelData()
+  // Second channel data source for the compare feature
+  const {
+    data: compareData,
+    isLoading: compareLoading,
+    analyzeChannel: analyzeCompare,
+    clear: clearCompare,
+  } = useChannelData()
+  const { recents, addRecent, clearRecents } = useRecentChannels()
   const [reportMode, setReportMode] = useState(false)
   const [activeTab, setActiveTab] = useState<"long" | "shorts">("long")
   const [showDetailedSections, setShowDetailedSections] = useState(true)
   const [channelInput, setChannelInput] = useState("")
   const [showIntro, setShowIntro] = useState(true)
+  const [shareLinkCopied, setShareLinkCopied] = useState(false)
+  const [showCompareInput, setShowCompareInput] = useState(false)
+  const [compareInput, setCompareInput] = useState("")
+  /** Tracks the last channel value we hydrated from the URL to avoid double-analyzing. */
+  const lastHydratedChannelRef = useRef<string | null>(null)
   const exampleHandles = ["@MrBeast", "@mkbhd", "@chriswillx"] as const
 
   // Fire landing_page_view once on mount
   useEffect(() => {
     trackEvent("landing_page_view")
   }, [])
+
+  // Auto-analyze when the page loads with a ?channel= query param, and re-analyze if
+  // the user navigates to a different channel URL (e.g. via browser back/forward).
+  useEffect(() => {
+    const channelParam = searchParams.get("channel")
+    if (!channelParam || channelParam === lastHydratedChannelRef.current) return
+    lastHydratedChannelRef.current = channelParam
+    startTransition(() => setShowIntro(false))
+    setChannelInput(channelParam)
+    setReportMode(true)
+    setShowDetailedSections(true)
+    void analyzeChannel(channelParam).then((analytics) => {
+      if (!analytics) {
+        trackEvent("analyze_failed")
+        return
+      }
+      trackEvent("analyze_success", { channel: channelParam.slice(0, 40) })
+      trackEvent("results_viewed")
+      setActiveTab(
+        analytics.longForm.videos.length === 0 && analytics.shorts.videos.length > 0
+          ? "shorts"
+          : "long",
+      )
+    })
+  }, [searchParams, analyzeChannel])
 
   const activeBucket =
     data == null ? null : activeTab === "long" ? data.longForm : data.shorts
@@ -73,8 +118,19 @@ export default function Home() {
       trackEvent("analyze_failed")
       return
     }
-    trackEvent("analyze_success", { channel: input })
+    // Update URL so the report is shareable and survives a reload.
+    // Set the ref before router.replace to prevent the URL-hydration effect
+    // from treating this URL change as a new analysis request.
+    lastHydratedChannelRef.current = input.trim()
+    router.replace(`/?channel=${encodeURIComponent(input.trim())}`, { scroll: false })
+    // Normalize channel identifier before sending to analytics (avoid leaking raw URLs).
+    const parsed = parseChannelUrl(input)
+    const channelLabel =
+      parsed.type === "handle" ? `@${parsed.value}`.slice(0, 40) : `[${parsed.type}]`
+    trackEvent("analyze_success", { channel: channelLabel })
     trackEvent("results_viewed")
+    // Save to recent channels for quick re-access
+    addRecent(analytics.channel, input)
     if (analytics.longForm.videos.length === 0 && analytics.shorts.videos.length > 0) {
       setActiveTab("shorts")
       return
@@ -84,14 +140,18 @@ export default function Home() {
 
   const handleBack = () => {
     clear()
+    clearCompare()
     setReportMode(false)
     setActiveTab("long")
     setShowDetailedSections(false)
     setChannelInput("")
+    setShowCompareInput(false)
+    setCompareInput("")
+    lastHydratedChannelRef.current = null
+    router.replace("/", { scroll: false })
   }
 
-  const handleGuidedAction = (action: SummaryCardAction) => {
-    if (action === "trends" || action === "videos") {
+  const handleGuidedAction = (action: SummaryCardAction) => {    if (action === "trends" || action === "videos") {
       setShowDetailedSections(true)
       window.setTimeout(() => {
         const targetId = action === "trends" ? "trends-section" : "videos-section"
@@ -115,6 +175,37 @@ export default function Home() {
         block: "start",
       })
     }, 80)
+  }
+
+  const handleCompareAnalyze = async (input: string) => {
+    if (!input.trim()) return
+    await analyzeCompare(input)
+    trackEvent("compare_analyzed")
+  }
+
+  const activeBucketForBestDay = data
+    ? activeTab === "shorts"
+      ? data.shorts
+      : data.longForm
+    : null
+
+  const bestDaySummary = useMemo(
+    () =>
+      activeBucketForBestDay
+        ? getBestDaySummary(activeBucketForBestDay.videos, activeBucketForBestDay.typicalViews)
+        : null,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [activeBucketForBestDay?.videos, activeBucketForBestDay?.typicalViews],
+  )
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href)
+      setShareLinkCopied(true)
+      window.setTimeout(() => setShareLinkCopied(false), 2000)
+    } catch {
+      // Clipboard API unavailable (e.g. non-HTTPS or restricted context)
+    }
   }
 
   return (
@@ -173,10 +264,10 @@ export default function Home() {
                       onAnalyze={handleAnalyze}
                       value={channelInput}
                       onValueChange={setChannelInput}
-                      placeholder="e.g. @MrBeast, youtube.com/c/MrBeast, or UCX6OQ3..."
+                      placeholder="@MrBeast, youtube.com/@handle, or UCxxxxxx…"
                     />
                     <p className="text-xs text-zinc-500">
-                      Supports YouTube channel URLs, @handles, and channel IDs
+                      Supports @handles, channel URLs, and channel IDs (UC…)
                     </p>
                     <div className="flex flex-wrap items-center justify-center gap-2">
                       <span className="text-[10px] uppercase tracking-wider text-zinc-600">Try:</span>
@@ -227,6 +318,16 @@ export default function Home() {
                 </section>
 
                 <LandingAttribution />
+
+                {/* Recent channels — shown below features, only when there's history */}
+                <RecentChannels
+                  recents={recents}
+                  onSelect={(handle) => {
+                    setChannelInput(handle)
+                    void handleAnalyze(handle)
+                  }}
+                  onClear={clearRecents}
+                />
               </>
             )}
 
@@ -313,6 +414,43 @@ export default function Home() {
                   >
                     Videos
                   </button>
+                  {/* Compare channel toggle */}
+                  <button
+                    type="button"
+                    onClick={() => setShowCompareInput((v) => !v)}
+                    aria-expanded={showCompareInput}
+                    aria-label="Compare with another channel"
+                    className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs transition-colors ${
+                      showCompareInput
+                        ? "border-indigo-500/40 text-indigo-300"
+                        : "border-white/8 text-zinc-400 hover:border-indigo-500/25 hover:text-indigo-300"
+                    }`}
+                  >
+                    <GitCompareArrows className="h-3 w-3 shrink-0" aria-hidden />
+                    <span>Compare</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleCopyLink}
+                    aria-label="Copy report link to clipboard"
+                    className={`ml-auto flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs transition-colors ${
+                      shareLinkCopied
+                        ? "border-[#3ecf8e]/30 text-[#3ecf8e]"
+                        : "border-white/8 text-zinc-400 hover:border-indigo-500/25 hover:text-indigo-300"
+                    }`}
+                  >
+                    {shareLinkCopied ? (
+                      <>
+                        <Check className="h-3 w-3 shrink-0" aria-hidden />
+                        <span>Copied!</span>
+                      </>
+                    ) : (
+                      <>
+                        <Link2 className="h-3 w-3 shrink-0" aria-hidden />
+                        <span>Share</span>
+                      </>
+                    )}
+                  </button>
                 </div>
               </div>
             </section>
@@ -322,6 +460,52 @@ export default function Home() {
             {!isLoading && data && activeBucket && (
               <>
                 <ChannelHeader channel={data.channel} />
+
+                {/* Compare channel input — shown when Compare toggle is active */}
+                {showCompareInput && (
+                  <div className="rounded-2xl border border-indigo-500/20 bg-[#08080f] px-4 py-3.5">
+                    <p className="mb-2 text-xs font-medium text-indigo-300">
+                      Compare with another channel
+                    </p>
+                    <SearchInput
+                      isLoading={compareLoading}
+                      onAnalyze={handleCompareAnalyze}
+                      value={compareInput}
+                      onValueChange={setCompareInput}
+                      placeholder="@handle or channel URL…"
+                    />
+                    {/* Inline progress message while the second fetch runs */}
+                    {compareLoading && (
+                      <p className="mt-2 text-[11px] text-zinc-500 animate-pulse">
+                        Fetching channel data — this takes 5–15 s depending on upload count…
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {/* Compare panel — visible as soon as compareData is ready; no extra state flag needed */}
+                {showCompareInput && compareData && !compareLoading && (
+                  <CompareChannels
+                    channelA={data.channel}
+                    channelB={compareData.channel}
+                    bucketA={activeTab === "shorts" ? data.shorts : data.longForm}
+                    bucketB={activeTab === "shorts" ? compareData.shorts : compareData.longForm}
+                    tab={activeTab}
+                    onClose={() => {
+                      setShowCompareInput(false)
+                      setCompareInput("")
+                      clearCompare()
+                    }}
+                  />
+                )}
+
+                {/* Best posting day notice */}
+                {bestDaySummary && (
+                  <p className="rounded-xl border border-indigo-500/15 bg-indigo-500/[0.06] px-4 py-2.5 text-xs text-indigo-300">
+                    📅 {bestDaySummary}
+                  </p>
+                )}
+
                 <GuidedInsightSummary
                   cards={guidedCards}
                   onAction={handleGuidedAction}
@@ -375,11 +559,11 @@ export default function Home() {
                 tooltip="Recent uploads are doing better or worse than earlier ones."
               />
               <SecondaryMetricCard
-                title="How steady results are"
+                title="Upload Cadence"
                 value={`${activeBucket.consistencyScore}/100`}
                 helper={consistencyExplanation(activeBucket.consistencyScore)}
                 tone={activeBucket.consistencyScore >= 60 ? "positive" : "neutral"}
-                tooltip="Shows whether performance is consistent or swings a lot."
+                tooltip="How evenly spaced the uploads are — based on variance between publish dates."
               />
               <SecondaryMetricCard
                 title="Beat-usual rate"
@@ -477,6 +661,14 @@ export default function Home() {
         )}
       </main>
     </div>
+  )
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={null}>
+      <HomeContent />
+    </Suspense>
   )
 }
 

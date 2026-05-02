@@ -6,6 +6,7 @@ import {
   calcEstimatedEarnings,
   calcPerformanceScore,
   calcTrendDelta,
+  escapeCsv,
   formatEarnings,
   formatViews,
   getConfidenceTier,
@@ -131,5 +132,76 @@ describe("estimated earnings", () => {
     expect(formatEarnings(1_250)).toBe("$1.3K")
     expect(formatEarnings(45_300)).toBe("$45.3K")
     expect(formatEarnings(1_200_000)).toBe("$1.2M")
+  })
+})
+
+describe("parseChannelUrl — additional cases", () => {
+  it("parses @handle from full URL", () => {
+    expect(parseChannelUrl("https://www.youtube.com/@MrBeast")).toEqual({
+      type: "handle",
+      value: "MrBeast",
+    })
+  })
+
+  it("parses channel ID from youtube.com/channel/ URL", () => {
+    expect(parseChannelUrl("youtube.com/channel/UCX6OQ3DkcsbYNE6H8uQQuVA")).toEqual({
+      type: "channelId",
+      value: "UCX6OQ3DkcsbYNE6H8uQQuVA",
+    })
+  })
+
+  it("parses legacy /c/ custom URL as username", () => {
+    expect(parseChannelUrl("https://youtube.com/c/LinusTechTips")).toEqual({
+      type: "username",
+      value: "LinusTechTips",
+    })
+  })
+
+  it("parses bare channel ID (UC...) as handle passthrough", () => {
+    const result = parseChannelUrl("UCX6OQ3DkcsbYNE6H8uQQuVA")
+    // bare UC ID is not a URL so it falls through to username
+    expect(result.value).toBe("UCX6OQ3DkcsbYNE6H8uQQuVA")
+  })
+
+  it("returns empty value for whitespace-only input", () => {
+    expect(parseChannelUrl("   ").value).toBe("")
+  })
+})
+
+// ─── CSV injection protection ─────────────────────────────────────────────
+
+describe("escapeCsv — formula injection protection", () => {
+  it("wraps normal strings in double quotes without modification", () => {
+    expect(escapeCsv("Hello World")).toBe('"Hello World"')
+    expect(escapeCsv("Normal Video Title")).toBe('"Normal Video Title"')
+  })
+
+  it("doubles any internal double quotes (RFC 4180)", () => {
+    expect(escapeCsv('Say "hello"')).toBe('"Say ""hello"""')
+  })
+
+  it("prefixes = with a single quote to prevent formula execution", () => {
+    expect(escapeCsv("=CMD|' /C calc'!A0")).toBe(`"'=CMD|' /C calc'!A0"`)
+  })
+
+  it("prefixes + with a single quote", () => {
+    expect(escapeCsv("+1+1")).toBe('"\''+"+1+1\"")
+  })
+
+  it("prefixes - with a single quote", () => {
+    expect(escapeCsv("-1")).toBe('"\'-1"')
+  })
+
+  it("prefixes @ with a single quote", () => {
+    expect(escapeCsv("@SUM(A1)")).toBe('"\'@SUM(A1)"')
+  })
+
+  it("prefixes tab with a single quote", () => {
+    expect(escapeCsv("\t=formula")).toBe('"\'\t=formula"')
+  })
+
+  it("does not prefix safe strings that happen to contain formula chars inside", () => {
+    expect(escapeCsv("Video +1M views")).toBe('"Video +1M views"')
+    expect(escapeCsv("100=great")).toBe('"100=great"')
   })
 })

@@ -65,7 +65,20 @@ type StatsActionResponse = {
   }>
 }
 
+// Bounded LRU cache: evicts the oldest entry when the limit is reached.
+// Prevents unbounded memory growth during long browser sessions.
+const CACHE_MAX_SIZE = 20
 const analyticsCache = new Map<string, ChannelAnalytics>()
+
+function cacheSet(key: string, value: ChannelAnalytics): void {
+  if (analyticsCache.size >= CACHE_MAX_SIZE) {
+    // Map preserves insertion order — delete the first (oldest) entry.
+    const oldestKey = analyticsCache.keys().next().value
+    if (oldestKey !== undefined) analyticsCache.delete(oldestKey)
+  }
+  analyticsCache.set(key, value)
+}
+
 const MAX_VIDEOS_TO_FETCH = 200
 const YOUTUBE_API_ROUTE = "/api/youtube"
 
@@ -171,7 +184,7 @@ export function useChannelData(): UseChannelDataResult {
           shorts,
         }
 
-        analyticsCache.set(cacheKey, analytics)
+        cacheSet(cacheKey, analytics)
         if (isStale()) return null
         startTransition(() => {
           setState({

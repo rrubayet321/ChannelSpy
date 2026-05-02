@@ -356,9 +356,14 @@ function csvCell(value: string | number): string {
   return escapeCsv(value)
 }
 
-function escapeCsv(value: string): string {
+/** Exported for testing. Escape a string value for a CSV cell. Wraps in double quotes and prefixes
+ *  any leading formula-injection character (=, +, -, @, tab, CR) with a single
+ *  quote to prevent spreadsheet formula execution (OWASP CSV injection). */
+export function escapeCsv(value: string): string {
+  const FORMULA_PREFIXES = ["=", "+", "-", "@", "\t", "\r"]
+  const prefix = FORMULA_PREFIXES.some((p) => value.startsWith(p)) ? "'" : ""
   const escaped = value.replace(/"/g, '""')
-  return `"${escaped}"`
+  return `"${prefix}${escaped}"`
 }
 
 function compactNumber(value: string): string {
